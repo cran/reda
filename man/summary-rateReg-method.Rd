@@ -11,11 +11,11 @@
 \item{object}{\code{\link{rateReg-class}} object.}
 
 \item{showCall}{A logic value with dafault \code{TRUE},
-indicating whether function \code{show} 
+indicating whether function \code{show}
 prints out the original call information of \code{rateReg}.
 It may be helpful for a more concise printout.}
 
-\item{showKnots}{A logic value with default \code{TRUE}, 
+\item{showKnots}{A logic value with default \code{TRUE},
 indicating whether function \code{show}
 prints out the internal and boundary knots.
 Similar to argument \code{showCall}, It may be helpful
@@ -28,8 +28,7 @@ summaryRateReg-class object
 }
 \description{
 Summary of estimated coefficients of covariates, rate function bases,
-and estimated rate parameter of frailty random variable, etc.,
-which can be printed out by \code{show}.
+and estimated rate parameter of frailty random variable, etc.
 }
 \details{
 \code{summary,rateReg-method} returns a
@@ -49,7 +48,7 @@ For the meaning of other slots, see \code{\link{rateReg}}.
 \seealso{
 \code{\link{rateReg}} for model fitting;
 \code{\link{coef,rateReg-method}} for point estimates of
-covariate coefficients; 
+covariate coefficients;
 \code{\link{confint,rateReg-method}} for confidence intervals
 of covariate coeffcients;
 \code{\link{baseRate,rateReg-method}} for coefficients of baseline

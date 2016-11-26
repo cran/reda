@@ -5,9 +5,8 @@
 \alias{rateRegMcf-class}
 \title{An S4 Class to Respresent Estimated MCF from a Fitted Model}
 \description{
-An S4 class that represents estimated mean cumulative function (MCF) 
-from Models.
-\code{\link{mcf}} produces objects of this class.
+An S4 class that represents estimated mean cumulative function (MCF) from
+Models.  \code{\link{mcf}} produces objects of this class.
 }
 \section{Slots}{
 
@@ -16,11 +15,13 @@ from Models.
 
 \item{\code{formula}}{Formula.}
 
+\item{\code{spline}}{A character.}
+
 \item{\code{knots}}{A numeric vector.}
 
 \item{\code{degree}}{A nonnegative integer.}
 
-\item{\code{boundaryKnots}}{A numeric vector.}
+\item{\code{Boundary.knots}}{A numeric vector.}
 
 \item{\code{newdata}}{A numeric matrix.}
 

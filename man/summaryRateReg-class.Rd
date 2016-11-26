@@ -5,8 +5,8 @@
 \alias{summaryRateReg-class}
 \title{An S4 Class to Represent Summary of a Fitted Model}
 \description{
-\code{summaryRateReg-class} is an S4 class with selective slots 
-of \code{rateReg-class} object.  See ``Slots'' for details.  
+\code{summaryRateReg-class} is an S4 class with selective slots
+of \code{rateReg-class} object.  See ``Slots'' for details.
 \code{\link{summary,rateReg-method}} produces objects of this class.
 }
 \section{Slots}{
@@ -14,9 +14,11 @@ of \code{rateReg-class} object.  See ``Slots'' for details.
 \describe{
 \item{\code{call}}{Function call.}
 
+\item{\code{spline}}{A character.}
+
 \item{\code{knots}}{A numeric vector.}
 
-\item{\code{boundaryKnots}}{A numeric vector.}
+\item{\code{Boundary.knots}}{A numeric vector.}
 
 \item{\code{covarCoef}}{A numeric matrix.}
 

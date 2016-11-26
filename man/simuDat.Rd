@@ -4,32 +4,33 @@
 \name{simuDat}
 \alias{simuDat}
 \title{Simulated Sample Dataset for Demonstration}
-\format{A data frame with 500 rows and 5 variables.}
+\format{A data frame with 500 rows and 6 variables.}
 \description{
-A simulated data frame with covariates named 
-\code{ID}, \code{time}, \code{event}, \code{group} and \code{x1},
-where
+A simulated data frame with covariates named
+\code{ID}, \code{time}, \code{event}, \code{group}, \code{x1},
+and \code{gender}, where
 \itemize{
     \item \code{ID}: Subjects identification;
     \item \code{time}: Event or censoring time;
     \item \code{event}: Event indicator, 1 = event, 0 = censored;
     \item \code{group}: Treatment group indicator;
-    \item \code{x1}: Continuous variable. 
+    \item \code{x1}: Continuous variable.
+    \item \code{gender}: Gender of subjects.
 }
 }
 \details{
 The sample dataset is originally simulated by the thinning
 method developed by Lewis and Shedler (1979) and
 further processed for a better demonstration purpose.
-See Fu et al. (2014) for details also.
+See Fu et al. (2016) for details also.
 }
 \references{
-Lewis, P. A., & Shedler, G. S. (1979). 
+Lewis, P. A., & Shedler, G. S. (1979).
 Simulation of nonhomogeneous Poisson processes by thinning.
 \emph{Naval Research Logistics Quarterly}, 26(3), 403--413.
 
-Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-Recurrent Time-to-Event (HEART) Models. 
-\emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
+Fu, H., Luo, J., & Qu, Y. (2016).
+Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
+\emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 }
 

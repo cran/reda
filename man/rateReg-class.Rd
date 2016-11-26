@@ -5,8 +5,8 @@
 \alias{rateReg-class}
 \title{An S4 Class to Represent a Fitted Model}
 \description{
-\code{rateReg-class} is an S4 class that represents a fitted model. 
-\code{\link{rateReg}} produces objects of this class.  
+\code{rateReg-class} is an S4 class that represents a fitted model.
+\code{\link{rateReg}} produces objects of this class.
 See ``Slots'' for details.
 }
 \section{Slots}{
@@ -18,13 +18,7 @@ See ``Slots'' for details.
 
 \item{\code{nObs}}{A positive integer}
 
-\item{\code{knots}}{A numeric vector.}
-
-\item{\code{boundaryKnots}}{A numeric vector.}
-
-\item{\code{degree}}{A nonnegative integer.}
-
-\item{\code{df}}{A list of nonnegative numeric vectors.}
+\item{\code{spline}}{A list.}
 
 \item{\code{estimates}}{A list.}
 

@@ -9,10 +9,12 @@
 \usage{
 mcf(object, ...)
 
-\S4method{mcf}{formula}(object, data, subset, na.action, level = 0.95, ...)
+\S4method{mcf}{formula}(object, data, subset, na.action,
+    variance = c("Poisson", "LawlessNadeau"), logConfInt = TRUE,
+    level = 0.95, ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
-  na.action, control = list(), ...)
+    na.action, control = list(), ...)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
@@ -20,24 +22,34 @@ mcf(object, ...)
 \item{...}{Other arguments for future usage.}
 
 \item{data}{An optional data frame, list or environment containing
-the variables in the model.  If not found in data, the variables are taken 
-from \code{environment(formula)}, usually the environment from which 
+the variables in the model.  If not found in data, the variables are taken
+from \code{environment(formula)}, usually the environment from which
 the function is called.}
 
-\item{subset}{An optional vector specifying a subset of observations 
+\item{subset}{An optional vector specifying a subset of observations
 to be used in the fitting process.}
 
-\item{na.action}{A function that indicates what should the procedure do 
-if the data contains \code{NA}s.  The default is set by the 
+\item{na.action}{A function that indicates what should the procedure do
+if the data contains \code{NA}s.  The default is set by the
 na.action setting of \code{\link[base]{options}}.
 The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 Other possible values inlcude \code{\link{na.fail}},
 \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 \code{help(na.fail)} for details.}
 
-\item{level}{An optional numeric value 
-indicating the confidence level required. 
-The default value is 0.95.}
+\item{variance}{An optional character specifying the variance estimator.
+The available options are "Poisson" (default) for Poisson process method,
+and "LawlessNadeau" for Lawless and Nadeau (1995) method. (A simple example
+is available at Reliawiki, 2012.)
+Partial matching on the names is allowed.}
+
+\item{logConfInt}{An optional logical value. If \code{TRUE} (default),
+the confidence interval of given level will be constucted based on the
+normality of logarithm of the MCF function. (Otherwise, the confidence
+interval will be constructed based on the normality of MCF function.)}
+
+\item{level}{An optional numeric value
+indicating the confidence level required. The default value is 0.95.}
 
 \item{newdata}{An optional data frame. If specified, the data frame should
 have the same column names as the covariate names appearing in the formula
@@ -51,9 +63,9 @@ for "male" and "female". The default value is "group".}
 each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are capital letters starting from "A".}
 
-\item{control}{An optional list to specify the time grid 
+\item{control}{An optional list to specify the time grid
 where the MCF are estimated.
-The availble elements of the control list include 
+The availble elements of the control list include
 \code{grid}, \code{length.out}, \code{from} and \code{to}.
 The time grid can be directly specified via element \code{grid}.
 A dense time grid is suggested.
@@ -62,7 +74,7 @@ The dafault value is 1,000.
 Element \code{from} means the starting point of grid with default 0.
 Element \code{to} represnts the endpoint of grid
 with the right boundary knot as default.
-When \code{grid} is missing, the grid will be generated 
+When \code{grid} is missing, the grid will be generated
 by \code{seq} (from package \pkg{base})
 with arguments \code{from}, \code{to} and \code{length.out}.}
 }
@@ -84,22 +96,24 @@ from a fitted model or computing the sample nonparametric MCF
 (also called Nelson-Aalen estimator) from data.
 }
 \details{
-For \code{formula} object with \code{\link{Survr}} object as response, 
+For \code{formula} object with \code{\link{Survr}} object as response,
 the covariate specified at the right hand side of the formula
-should be either 1 or any one factor variable in the data.
+should be either 1 or any "linear" conbination of factor variable
+in the data.
 The former computes the overall sample MCF.
-The latter computes the sample MCF for each level of
-the factor variable specified, respectively.
+The latter computes the sample MCF for each level of the combination of
+the factor variable(s) specified, respectively.
 The sample MCF is also called Nelson-Aalen nonparametric estimator
 (Nelson, 2003) and computed on each time point from sample data.
 The point estimate of sample MCF at each time point does not
-assume any particular underlying model. The variance
-of estimated MCF (ReliaWiki, 2012) at each time point is estimated
-and the approximate confidence intervals are provided as well,
+assume any particular underlying model. The variance estimates
+at each time point is given by Poisson process method (by default)
+or Lawless and Nadeau method (LawLess and Nadeau, 1995).
+The approximate confidence intervals are provided as well,
 which are constructed based on the asymptotic normality
-of log mean cumulative function.
+of logarithm of MCF (by default) or MCF itself directly.
 
-For \code{\link{rateReg-class}} object, 
+For \code{\link{rateReg-class}} object,
 \code{mcf} estimates the baseline MCF and its confidence interval
 at each time grid if argument \code{newdata} is not specified.
 Otherwise, \code{mcf} estimates MCF and its confidence interval
@@ -113,29 +127,41 @@ for the given newdata based on Delta-method.
 }}
 \examples{
 library(reda)
- 
-## sample MCF
-sampleMcf <- mcf(Survr(ID, time, event) ~ group,
-                 data = simuDat, subset = ID \%in\% 1:10)
+
+### Example 1. valve-seat data
+valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
 
 ## plot sample MCF
-plotMcf(sampleMcf, lty = c(1, 3), col = c("orange", "navy"),
-        mark.time = TRUE) + ggplot2::xlab("Days") + ggplot2::theme_bw()
+plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+
+### Example 2. sample simulated data
+simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+               data = simuDat, ID \%in\% 1 : 50, logConfInt = FALSE)
+
+## create customized levels in legend
+levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
+levs <- do.call(paste, c(as.list(levs), sep = " & "))
+
+## plot sample MCF
+plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
+     legendName = "Treatment & Gender", legendLevels = levs)
 
 ## For estimated MCF from a fitted model,
 ## see examples given in function rateReg.
- 
 }
 \references{
 Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
 repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
 
-ReliaWiki. (2012, March 19). Recurrent Event Data Analysis. 
+Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
+Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
+
+ReliaWiki. (2012, March 19). Recurrent Event Data Analysis.
 Retrieved November 23, 2015, from
 \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
-\code{\link{plotMcf}} for plotting MCF.
+\code{\link{plot}} for plotting MCF.
 }
 

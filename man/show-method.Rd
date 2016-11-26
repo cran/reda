@@ -25,9 +25,9 @@ An S4 class generic function that displays certain object.
 }
 \details{
 \itemize{
-  \item For \code{\link{rateReg-class}} object, 
+  \item For \code{\link{rateReg-class}} object,
       it prints out brief summary of the fitted model.
-  \item For \code{\link{summaryRateReg-class}} object, 
+  \item For \code{\link{summaryRateReg-class}} object,
       it prints out summary of the fitted model.
   \item For \code{\link{sampleMcf-class}} object,
       it prints out the function call, formula and

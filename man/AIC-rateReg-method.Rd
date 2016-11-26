@@ -25,14 +25,15 @@ which is the number of parameters in the fitted model.
 }
 \description{
 \code{AIC,rateReg-method} is an S4 class method calculating
-Akaike information criterion (AIC) for one or several 
+Akaike information criterion (AIC) for one or several
 \code{rateReg-class} objects, according to the formula
 - 2 * log-likelihood + 2 * nPar, where nPar represents the number
 of parameters in the fitted model.
 }
 \details{
-When comparing models fitted by maximum likelihood to the same
-data, the smaller the AIC, the better the fit.
+When comparing models fitted by maximum likelihood to the same data, the
+smaller the AIC, the better the fit. A friendly warning will be thrown out
+if the numbers of observation were different in the model comparison.
 \code{help(AIC, stats)} for other details.
 }
 \examples{

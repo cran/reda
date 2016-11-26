@@ -4,7 +4,7 @@
 \alias{Survr}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Survr(ID, time, event)
+Survr(ID, time, event, check = TRUE, ...)
 }
 \arguments{
 \item{ID}{Identificator of each subject.}
@@ -12,6 +12,13 @@ Survr(ID, time, event)
 \item{time}{Time of reccurence event or censoring.}
 
 \item{event}{The status indicator, 0 = censored, 1 = event.}
+
+\item{check}{Logical value suggesting whether to perform data checking
+procedure. The default value is \code{TRUE}. \code{FALSE} should be set
+with caution and only for processed data already in recerruent event
+data framework.}
+
+\item{...}{Other arguments for future usage.}
 }
 \description{
 \code{Survr} is an S3 class that represents
@@ -21,15 +28,15 @@ The last letter 'r' in 'Survr' represents 'rate'.
 }
 \details{
 This is a similar function to \code{Survr} in package
-\pkg{survrec} but with a better embedded checking procedure for
-recurrent event data modeled by methods
-based on counts and rate function.
+\pkg{survrec} but with a more considerate checking procedure embedded for
+recurrent event data modeled by methods based on counts and rate function.
 The checking rules include that
 \itemize{
     \item Identification of each subject cannot be missing.
     \item Event indicator must be coded as 0 (censored) or 1 (event).
-    \item Event time and censoring time cannot be missing.
-    \item Each subject must have one and only one censoring time.
+    \item Event time and censoring time must be numeric
+        and cannot be missing.
+    \item Each subject must have only one censoring time.
     \item Event time cannot not be later than censoring time.
 }
 }
