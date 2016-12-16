@@ -45,7 +45,7 @@ NULL
 ##' @export
 setMethod(f = "coef", signature = "rateReg",
           definition = function(object, ...) {
-              object@estimates$beta[, 1L]
+              object@estimates$beta[, "coef"]
           })
 
 
@@ -82,7 +82,7 @@ setMethod(f = "coef", signature = "rateReg",
 ##' Springer texts in statistics, New York: Springer, 2nd Edition.
 ##' @examples
 ##' ## See examples given in function rateReg.
-##' @importFrom stats confint
+##' @importFrom stats confint qnorm
 ##' @export
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
@@ -92,7 +92,7 @@ setMethod(f = "confint", signature = "rateReg",
                                 scientific = FALSE), "%")
               }
               betaMat <- object@estimates$beta
-              estCoef <- betaMat[, 1L]
+              estCoef <- betaMat[, "coef"]
               pnames <- attr(betaMat, "dimnames")[[1L]]
               if (missing(parm)) {
                   parm <- seq(nrow(betaMat))
@@ -108,7 +108,7 @@ setMethod(f = "confint", signature = "rateReg",
               pct <- format.perc(a)
               ci <- array(NA, dim = c(length(parm), 2L),
                           dimnames = list(parm, pct))
-              ses <- betaMat[parm, 2L]
+              ses <- betaMat[parm, "se(coef)"]
               ci[] <- estCoef[parm] + ses %o% fac
               rownames(ci) <- pnames[parm]
               ## return

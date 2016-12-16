@@ -33,8 +33,8 @@ to be used in the fitting process.}
 if the data contains \code{NA}s.  The default is set by the
 na.action setting of \code{\link[base]{options}}.
 The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-Other possible values inlcude \code{\link{na.fail}},
-\code{\link{na.exclude}}, and \code{\link{na.pass}}.
+Other possible values inlcude \code{\link[stats]{na.fail}},
+\code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
 \code{help(na.fail)} for details.}
 
 \item{variance}{An optional character specifying the variance estimator.
@@ -64,7 +64,7 @@ each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are capital letters starting from "A".}
 
 \item{control}{An optional list to specify the time grid
-where the MCF are estimated.
+where the MCF is estimated.
 The availble elements of the control list include
 \code{grid}, \code{length.out}, \code{from} and \code{to}.
 The time grid can be directly specified via element \code{grid}.
@@ -162,6 +162,6 @@ Retrieved November 23, 2015, from
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
-\code{\link{plot}} for plotting MCF.
+\code{\link{plot-method}} for plotting MCF.
 }
 

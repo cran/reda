@@ -58,8 +58,8 @@ NULL
 ##' if the data contains \code{NA}s.  The default is set by the
 ##' na.action setting of \code{\link[base]{options}}.
 ##' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-##' Other possible values inlcude \code{\link{na.fail}},
-##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
+##' Other possible values inlcude \code{\link[stats]{na.fail}},
+##' \code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
 ##' \code{help(na.fail)} for details.
 ##' @param level An optional numeric value
 ##' indicating the confidence level required. The default value is 0.95.
@@ -86,7 +86,7 @@ NULL
 ##' \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
-##' \code{\link{plot}} for plotting MCF.
+##' \code{\link{plot-method}} for plotting MCF.
 ##' @examples
 ##' library(reda)
 ##'
@@ -135,7 +135,7 @@ setGeneric(name = "mcf",
 ##' normality of logarithm of the MCF function. (Otherwise, the confidence
 ##' interval will be constructed based on the normality of MCF function.)
 ##' @aliases mcf,formula-method
-##' @importFrom stats na.fail na.omit na.exclude na.pass
+##' @importFrom stats na.fail na.omit na.exclude na.pass qnorm
 ##' @export
 setMethod(
     f = "mcf", signature = "formula",
@@ -307,7 +307,7 @@ setMethod(
 ##' each unique row in \code{newdata}, such as "treatment" and "control".
 ##' The default values are capital letters starting from "A".
 ##' @param control An optional list to specify the time grid
-##' where the MCF are estimated.
+##' where the MCF is estimated.
 ##' The availble elements of the control list include
 ##' \code{grid}, \code{length.out}, \code{from} and \code{to}.
 ##' The time grid can be directly specified via element \code{grid}.
@@ -330,8 +330,8 @@ setMethod(
                           level = 0.95, na.action, control = list(), ...) {
 
         ## extract model fitting information from object
-        beta <- object@estimates$beta[, 1L]
-        alpha <- object@estimates$alpha[, 1L]
+        beta <- object@estimates$beta[, "coef"]
+        alpha <- object@estimates$alpha[, "coef"]
         fcovnames <- as.character(object@call[[2L]][[3L]])
         covnames <- fcovnames[fcovnames != "+"]
         nBeta <- length(beta)
@@ -443,7 +443,7 @@ setMethod(
 ## compute sample MCF
 sMcf <- function(inpDat, variance, logConfInt, level) {
     ## if time ties, put event time before censoring time
-    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3)]
+    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3L)]
 
     num_pat <- length(unique(inpDat$ID))
     num_at_risk <- num_pat - cumsum(inpDat$event == 0)
@@ -501,8 +501,8 @@ gradDelta <- function(Xi, iMat, estMcf, coveffi) {
 rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
                                 Boundary.knots_) {
     ## controls for function MCF with signiture rateReg
-    from <- if (missing(from)) Boundary.knots_[1]
-    to  <- if (missing(to)) Boundary.knots_[2]
+    from <- if (missing(from)) Boundary.knots_[1L]
+    to  <- if (missing(to)) Boundary.knots_[2L]
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid))
             stop("'grid' specified must be an increasing numeric vector.")

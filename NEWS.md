@@ -1,6 +1,23 @@
-# reda v0.3.0
+# CHANGES IN reda VERSION 0.3.1
 
-## New features
+## NEW FEATURES
+
+* Added estimated baseline rate function and its confidence band, and
+  corresponding plot method.
+
+## MAJOR CHANGES
+
+* Updated function `baseRate` for estimated baseline rate function instead of
+  the estimated coefficients of spline bases.
+
+## BUG FIXES
+
+* Fixed function `confint` by specifying the correct standard error column.
+
+
+# CHANGES IN reda VERSION 0.3.0
+
+## NEW FEATURES
 
 * Added M-spline for modeling baseline rate to function `rateReg`.
 
@@ -20,7 +37,7 @@
 
 * Added sample valve-seat dataset from Nelson (1995) for demonstration.
 
-## Major changes
+## MAJOR CHANGES
 
 * Borrowed the power from R package **splines2** for piece-wise constant and
   splines based baseline rate function, and thus boosted the performance of
@@ -35,7 +52,7 @@
 * Added variable "gender" in sample simulated dataset, `simuDat` for a better
   demonstration of sample MCF function.
 
-# Minor changes
+## MINOR CHANGES
 
 * Renamed all slot named `boundaryKnots` to `Boundary.knots` for consistency
   with spline functions.
@@ -45,9 +62,23 @@
 * Added sample citation entry for **reda**.
 
 
-# reda v0.2.1
+# CHANGES IN reda VERSION 0.2.1
 
-## Bug fixes
+## NEW FEATURES
+
+* Implementation of spline baseline rate function.
+
+* Added function `AIC` and `BIC`.
+
+## MAJOR CHANGES
+
+* Renamed main function name from `heart` to `rateReg` and added new argument.
+
+* Updated object class of fitted model.
+
+* Replaced sample simulated dataset for demonstration.
+
+## BUG FIXES
 
 * Updated S4 method `plotMcf,sampleMcf`: Replaced `show_guide` with
   `show.legend` in function `geom_text` to incorporate updates in package
@@ -56,26 +87,9 @@
 * Minor updates that clear checking note from CRAN.
 
 
-# reda v0.2.0
+# CHANGES IN reda VERSION 0.1.0
 
-## New features
-
-* Implementation of spline baseline rate function.
-
-* Added function `AIC` and `BIC`.
-
-## Major changes
-
-* Renamed main function name from `heart` to `rateReg` and added new argument.
-
-* Updated object class of fitted model.
-
-* Replaced sample simulated dataset for demonstration.
-
-
-# reda v0.1.0
-
-## New features
+## NEW FEATURES
 
 * First version of reda mainly providing function to fit gamma frailty model
   with piece-wise constant baseline rate function for recurrent event data.

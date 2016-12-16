@@ -1,6 +1,5 @@
 ## ----setup---------------------------------------------------------------
-library(reda) # attach package
-data(simuDat) # attach sample dataset
+library(reda)
 
 ## ----data----------------------------------------------------------------
 head(simuDat)
@@ -16,18 +15,15 @@ str(simuDat)
 
 ## ----sixPieces-----------------------------------------------------------
 ## df = 2 will be neglected since knots are explicitly specified
-(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
-                      data = simuDat, subset = ID %in% 1:50,
-                      knots = seq(from = 28, to = 140, by = 28)))
+(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+                      df = 2, knots = seq(from = 28, to = 140, by = 28)))
 
 ## ----spline--------------------------------------------------------------
 ## internal knots are set as 33% and 67% quantiles of time variable
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                      data = simuDat, subset = ID %in% 1:50,
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                       df = 6, degree = 3, spline = "mSplines"))
 ## or internal knots are expicitly specified
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                      data = simuDat, subset = ID %in% 1:50,
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                       spline = "bSplines", degree = 3L, knots = c(56, 112)))
 
 ## ----summary-------------------------------------------------------------
@@ -40,12 +36,14 @@ summary(splineFit, showCall = FALSE, showKnots = FALSE)
 coef(splineFit)
 ## confidence interval for covariate coefficients
 confint(splineFit, level = 0.95)
-## estimated coefficients of baseline rate function
-baseRate(splineFit)
 
 ## ----modelSelect---------------------------------------------------------
 AIC(constFit, piecesFit, splineFit)
 BIC(constFit, piecesFit, splineFit)
+
+## ----baseRate, fig.width = 7, fig.height = 5-----------------------------
+baseRateObj <- baseRate(splineFit)
+plot(baseRateObj, conf.int = TRUE)
 
 ## ----sampleMcf-----------------------------------------------------------
 ## overall sample MCF for valve-seat data in Nelson (1995)
