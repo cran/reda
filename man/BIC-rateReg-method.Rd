@@ -24,7 +24,7 @@ which is the number of parameters in the fitted model.
 \code{BIC,rateReg-method} is an S4 class method calculating
 Bayesian information criterion (BIC) or so-called
 Schwarz's Bayesian criterion (SBC)
-for one or several \code{rateReg-class} objects,
+for one or several \code{rateReg} objects,
 according to the formula
 - 2 * log-likelihood + ln(nObs) * nPar,
 where nPar represents the number of parameters in the fitted model
@@ -43,4 +43,3 @@ data, the smaller the BIC, the better the fit.
 \code{\link{summary,rateReg-method}} for summary of a fitted model;
 \code{\link{AIC,rateReg-method}} for AIC.
 }
-

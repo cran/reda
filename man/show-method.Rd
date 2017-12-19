@@ -2,44 +2,35 @@
 % Please edit documentation in R/show.R
 \docType{methods}
 \name{show-method}
-\alias{show,rateReg-method}
-\alias{show,rateRegMcf-method}
-\alias{show,sampleMcf-method}
-\alias{show,summaryRateReg-method}
 \alias{show-method}
+\alias{show,rateReg-method}
+\alias{show,summary.rateReg-method}
+\alias{show,summaryRateReg-method}
+\alias{show,mcf.formula-method}
+\alias{show,mcf.rateReg-method}
+\alias{show,simEvent-method}
+\alias{show,mcfDiff-method}
+\alias{show,mcfDiff.test-method}
 \title{Show an object.}
 \usage{
 \S4method{show}{rateReg}(object)
 
-\S4method{show}{summaryRateReg}(object)
+\S4method{show}{summary.rateReg}(object)
 
-\S4method{show}{sampleMcf}(object)
+\S4method{show}{mcf.formula}(object)
 
-\S4method{show}{rateRegMcf}(object)
+\S4method{show}{mcf.rateReg}(object)
+
+\S4method{show}{simEvent}(object)
+
+\S4method{show}{mcfDiff}(object)
+
+\S4method{show}{mcfDiff.test}(object)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
 }
 \description{
-An S4 class generic function that displays certain object.
+S4 class methods that display objects produced from this package (similar to
+S3 class \code{print} methods).
 }
-\details{
-\itemize{
-  \item For \code{\link{rateReg-class}} object,
-      it prints out brief summary of the fitted model.
-  \item For \code{\link{summaryRateReg-class}} object,
-      it prints out summary of the fitted model.
-  \item For \code{\link{sampleMcf-class}} object,
-      it prints out the function call, formula and
-      the sample MCF data frame.
-  \item For \code{\link{rateRegMcf-class}} object,
-      it prints formula, new data, confidence level,
-      and the estimated MCF data frame.
-}
-}
-\seealso{
-\code{\link{rateReg}} for model fitting;
-\code{\link{summary,rateReg-method}} for summary of a fitted model;
-\code{\link{mcf}} for estimation of MCF.
-}
-

@@ -44,12 +44,12 @@ function.
 \itemize{
 \item \code{rateReg}: Estiamted baseline rate from a fitted model.
 }}
+
 \examples{
 ## See examples given in function rateReg.
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
 \code{\link{summary,rateReg-method}} for summary of a fitted model;
-\code{\link{plot,baseRateReg-method}} for ploting method.
+\code{\link{plot,baseRate.rateReg-method}} for ploting method.
 }
-

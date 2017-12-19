@@ -3,11 +3,11 @@
 \docType{class}
 \name{rateReg-class}
 \alias{rateReg-class}
-\title{An S4 Class to Represent a Fitted Model}
+\title{An S4 Class Representing a Fitted Model}
 \description{
-\code{rateReg-class} is an S4 class that represents a fitted model.
-\code{\link{rateReg}} produces objects of this class.
-See ``Slots'' for details.
+The class \code{rateReg} is an S4 class that represents a fitted model.  The
+function \code{\link{rateReg}} produces objects of this class.  See
+``Slots'' for details.
 }
 \section{Slots}{
 
@@ -26,7 +26,7 @@ See ``Slots'' for details.
 
 \item{\code{start}}{A list.}
 
-\item{\code{na.action}}{A length-one character vector.}
+\item{\code{na.action}}{A character vector (of length one).}
 
 \item{\code{xlevels}}{A list.}
 
@@ -38,7 +38,7 @@ See ``Slots'' for details.
 
 \item{\code{fisher}}{A numeric matrix.}
 }}
-\seealso{
-\code{\link{rateReg}} for details of slots.
-}
 
+\seealso{
+\code{\link{rateReg}}
+}
