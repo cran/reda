@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ### collation after class.R and mcf-generic.R
@@ -288,6 +286,23 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
 
     ## non-sense to pass R CMD check for "no visible binding"
     time <- NULL
+
+    ## FIXME
+    ## temp solution: convert output of Recur to Survr
+    conv2Survr <- function(mcf_obj) {
+        dat <- mcf_obj@data
+        first_idx <- ! duplicated(dat$id)
+        origin_vec <- rep(dat$time1[first_idx], table(factor(dat$id)))
+        out <- data.frame(ID = dat$id, time = dat$time2,
+                          event = dat$event, origin = origin_vec)
+        dat$time1 <- dat$time2 <- dat$id <- dat$event <- dat$terminal <- NULL
+        mcf_obj@data <- cbind(out, dat)
+        mcf_obj
+    }
+    mcf1 <- conv2Survr(mcf1)
+    if (! is.null(mcf2)) {
+        mcf2 <- conv2Survr(mcf2)
+    }
 
     if (mcf1@multiGroup) {
         nLevel <- length(mcf1@origin)

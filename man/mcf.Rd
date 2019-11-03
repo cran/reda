@@ -10,11 +10,12 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-    variance = c("LawlessNadeau", "Poisson", "bootstrap"), logConfInt = FALSE,
-    level = 0.95, control = list(), ...)
+    variance = c("LawlessNadeau", "Poisson", "bootstrap", "CSV"),
+    logConfInt = FALSE, adjustRiskset = TRUE, level = 0.95,
+    control = list(), ...)
 
-\S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
-    na.action, control = list(), ...)
+\S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels,
+    level = 0.95, na.action, control = list(), ...)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
@@ -39,13 +40,22 @@ setting of \code{\link[base]{options}}.  The "factory-fresh" default is
 \item{variance}{A character specifying the method for variance estimates.
 The available options are \code{"LawlessNadeau"} (the default) for
 Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
-method, and \code{"bootstrap"} for bootstrap method.  Partial matching
-on the names is allowed.}
+method, \code{"bootstrap"} for bootstrap method, and \code{"CSV"} for
+variance estimates of the corresponding cumulative sample mean function
+(CSM) by the cumulative sample variance method (Cook and Lawless, 2007).
+Partial matching on the names is allowed.}
 
 \item{logConfInt}{A logical value. If \code{FALSE} (the default), the
 confidence interval are constructed based on the normality of the MCF
 estimates. Otherwise, the confidence intervals of given level are
 constucted based on the normality of logarithm of the MCF estimates.}
+
+\item{adjustRiskset}{A logical value indicating whether to adjust the size
+of risk-set.  If \code{TRUE} by default, the size of risk-set will be
+adjusted based on at-risk indicators and Nelson-Aalen estimator will be
+returned.  Otherwise, the cumulative sample mean (CSM) function given by
+Cook and Lawless (2007) will be returned without adjustment on size of
+risk-set.}
 
 \item{level}{An optional numeric value indicating the confidence level
 required. The default value is 0.95.}
@@ -145,29 +155,36 @@ follows:
 }
 \description{
 An S4 class generic function that returns the mean cumulative function (MCF)
-estimates from a fitted model or returns the nonparametric MCF estimates
-(also called the Nelson-Aalen estimator) from the sample data.
+estimates from a fitted model or returns the nonparametric MCF estimates (by
+Nelson-Aalen estimator or Cook-Lawless cumulative sample mean estimator)
+from the sample data.
 }
 \details{
-For \code{formula} object with \code{\link{Survr}} object as response, the
+For \code{formula} object with \code{\link{Recur}} object as response, the
 covariate specified at the right hand side of the formula should be either
 \code{1} or any "linear" conbination of categorical variable in the data.
 The former computes the overall sample MCF.  The latter computes the sample
 MCF for each level of the combination of the categorical variable(s)
-specified, respectively.  The sample MCF is also called Nelson-Aalen
-nonparametric estimator (Nelson 2003) and computed on each time point from
-sample data.  The point estimate of sample MCF at each time point does not
-assume any particular underlying model. The variance estimates at each time
-point is computed following the Lawless and Nadeau method (LawLess and
-Nadeau 1995), the Poisson process method, or the bootstrap methods.  The
-approximate confidence intervals are provided as well, which are constructed
-based on the asymptotic normality of the MCF itself (by default) or the
-logarithm of MCF.
+specified, respectively.
 
-For \code{rateReg} object, \code{mcf} estimates the baseline
-MCF and its confidence interval at each time grid if argument \code{newdata}
-is not specified.  Otherwise, \code{mcf} estimates MCF and its confidence
-interval for the given newdata based on Delta-method.
+The MCF estimates are computed on each unique time point of the sample data.
+By default, the size of risk set is adjusted over time based on the at-risk
+indicators, which results in the Nelson-Aalen nonparametric estimator
+(Nelson 2003).  If the size of risk set remains a constant (total number of
+processes) over time (specified by \code{adjustRiskset = FALSE}), the
+cumulative sample mean (CSM) function introduced in Chapter 1 of Cook and
+Lawless (2007) will be computed instead.  The point estimate of sample MCF
+at each time point does not assume any particular underlying model. The
+variance estimates at each time point is computed following the Lawless and
+Nadeau method (LawLess and Nadeau 1995), the Poisson process method, or the
+bootstrap methods.  The approximate confidence intervals are provided as
+well, which are constructed based on the asymptotic normality of the MCF
+itself (by default) or the logarithm of MCF.
+
+For \code{rateReg} object, \code{mcf} estimates the baseline MCF and its
+confidence interval at each time grid if argument \code{newdata} is not
+specified.  Otherwise, \code{mcf} estimates MCF and its confidence interval
+for the given \code{newdata} based on Delta-method.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -182,17 +199,18 @@ library(reda)
 ### sample MCF
 ## Example 1. valve-seat data
 ## the default variance estimates by Lawless and Nadeau (1995) method
-valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
+valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 
 ## variance estimates following Poisson process model
-valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
+valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "Poisson")
 ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
-valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1,
+set.seed(123)
+valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 2e2))
+                 control = list(B = 1e3))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)
@@ -212,14 +230,14 @@ ggplot(ciDat, aes(x = time)) +
 
 
 ## Example 2. the simulated data
-simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+simuMcf <- mcf(Recur(time, ID, event) ~ group + gender,
                data = simuDat, ID \%in\% 1 : 50)
 plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
      legendName = "Treatment & Gender")
 
 ### estimate MCF difference between two groups
 ## one sample MCF object of two groups
-mcf0 <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
+mcf0 <- mcf(Recur(time, ID, event) ~ group, data = simuDat)
 ## two-sample pseudo-score tests
 mcfDiff.test(mcf0)
 ## difference estimates over time
@@ -227,9 +245,9 @@ mcf0_diff <- mcfDiff(mcf0, testVariance = "none")
 plot(mcf0_diff)
 
 ## or explicitly ask for the difference of two sample MCF
-mcf1 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
+mcf1 <- mcf(Recur(time, ID, event) ~ 1, data = simuDat,
             subset = group \%in\% "Contr")
-mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
+mcf2 <- mcf(Recur(time, ID, event) ~ 1, data = simuDat,
             subset = group \%in\% "Treat")
 ## perform two-sample tests and estimate difference at the same time
 mcf12_diff1 <- mcfDiff(mcf1, mcf2)
@@ -242,6 +260,9 @@ plot(mcf12_diff1)
 ### see examples given in function rateReg.
 }
 \references{
+Cook, R. J., and Lawless, J. (2007). \emph{The statistical analysis of
+recurrent events}, Springer Science & Business Media.
+
 Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
 Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
 

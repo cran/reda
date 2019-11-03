@@ -2,22 +2,19 @@
 
 ## Overview
 
-The R pacakge **reda** provides functions for
+The R package **reda** provides functions for
 
 - simulating survival, recurrent event, and multiple event data from stochastic
   process point of view;
 - exploring and modeling recurrent event data through the mean cumulative
-  function (MCF) or also called the Nelson-Aalen estimator of the cumulative
-  hazard rate function, and gamma frailty model with spline rate function;
+  function (MCF) by the Nelson-Aalen estimator of the cumulative hazard rate
+  function, and gamma frailty model with spline rate function;
 - comparing two-sample recurrent event responses with the pseudo-score tests.
 
 
-## Installation of CRAN Version
+## Installation
 
 [![CRAN_Status_Badge][r-pkg-badge]][cran-url]
-[![Build Status][travis-master]][travis]
-[![codecov][codecov-master]][codecov]
-
 
 You can install the released version from [CRAN][cran-url].
 
@@ -26,28 +23,29 @@ install.packages("reda")
 ```
 
 
+## Getting Started
+
+- [Online documentation][homepage] provides function documentations and includes
+  package vignettes for
+  - [exploring and modeling recurrent event data][reda-intro].
+  - [introduction to formula response function Recur()][reda-Recur]
+  - [simulating survival and recurrent event data][reda-simulate].
+
+
 ## Development
 
-[![Build Status][travis-dev]][travis]
-[![codecov][codecov-dev]][codecov]
+[![Build Status][travis-master]][travis]
+[![AppVeyor Build Status][appveyor-master]][appveyor]
+[![codecov][codecov-master]][codecov]
 
-The latest version of package is under development at [GitHub][github-url] in
-branch 'dev'.  If it is able to pass the building check by Travis CI, you may
-consider installing it with the help of **remotes** by
+The latest version of the package is under development at [GitHub][github-url].
+If it is able to pass the building check by Travis CI, you may consider
+installing it with the help of **remotes** by
 
 ```R
 if (! require(remotes)) install.packages("remotes")
-remotes::install_github("wenjie2wang/reda", ref = "dev")
+remotes::install_github("wenjie2wang/reda")
 ```
-
-
-## Getting Started
-
-- [Online documentation][homepage]
-    - [Package vignette][reda-intro] on exploring and modeling recurrent event
-      data.
-    - [Package vignette][reda-simulate] on simulating survival and recurrent
-      event data.
 
 
 ## License
@@ -67,12 +65,13 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [cran-url]: https://CRAN.R-project.org/package=reda
 [travis]: https://travis-ci.org/wenjie2wang/reda
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
-[travis-dev]: https://travis-ci.org/wenjie2wang/reda.svg?branch=dev
+[appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
+[appveyor-master]: https://ci.appveyor.com/api/projects/status/w6pr8b4clsnyfp32?svg=true
 [github-url]: https://github.com/wenjie2wang/reda
 [homepage]: https://wenjie-stat.me/reda/
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
+[reda-Recur]: https://wenjie-stat.me/reda/articles/reda-Recur.html
 [reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
 [gpl-url]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
-[codecov-dev]: https://codecov.io/gh/wenjie2wang/reda/branch/dev/graph/badge.svg

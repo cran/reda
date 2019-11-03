@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ## collation after class.R
@@ -25,9 +23,9 @@ NULL
 
 ##' Formula Response for Recurrent Event Data
 ##'
-##' \code{Survr} is an S4 class that represents
-##' formula response for recurrent event data
-##' modeled by methods based on counts and rate function.
+##' Create an S4 class that represents formula response for recurrent event data
+##' modeled by methods based on counts and rate function.  Note that the
+##' function is deprecated since version 0.5.0 and will be removed in future.
 ##'
 ##' This is a similar function to \code{Survr} in package
 ##' \pkg{survrec} but with a more considerate checking procedure embedded for
@@ -63,10 +61,18 @@ NULL
 ##'
 ##' @aliases Survr
 ##'
-##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
 Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
 {
+    ## deprecated from version 0.5.0
+    .Deprecated(new = "Recur",
+                msg = sprintf(paste(
+                    "'%s()' is deprecated and will be removed in future.",
+                    "Please use '%s()' instead.",
+                    "\n'help(\"Recur\")' for details."),
+                    "Survr", "Recur"
+                    ))
+
     if (missing(ID))
         stop("ID variable cannot be missing.")
     if (missing(time))
@@ -87,7 +93,7 @@ check_Survr <- function(dat, check, ...)
     event <- dat[, "event"]
     origin <- dat[, "origin"]
 
-    if (any(is.na(ID)))
+    if (anyNA(ID))
         stop("'ID' cannot contain missing values.", call. = FALSE)
     if (inherits(time, "difftime") || inherits(time, "Date"))
         time <- unclass(time)
@@ -116,7 +122,7 @@ check_Survr <- function(dat, check, ...)
 
     ## whether data were ordered or not
     ord <- attr(dat, "ord")
-    sortDat <- if (is.null(ord)) {
+    sortDat <- if (is.null(ord) || length(ord) != length(ID_)) {
                    ## sort the data by ID, time, and event
                    as.data.frame(dat[(ord <- order(ID, time, - event)), ])
                } else {

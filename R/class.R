@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ##' An S4 Class Representing Formula Response
@@ -41,6 +39,54 @@ setClass(
         ID = "factor",
         check = "logical",
         ord = "integer"
+    )
+)
+
+
+##' An S4 Class Representing Formula Response for Recurrent Event Data
+##'
+##' The class \code{Recur} is an S4 that represents a formula response for
+##' recurrent event data model.  The function \code{\link{Recur}} produces
+##' objects of this class.  See ``Slots'' for details.
+##'
+##' @aliases Recur-class
+##'
+##' @slot .Data A numeric matrix that consists of the following columns:
+##'     \itemize{ \item \code{time1}: the beginning of time segements; \item
+##'     \code{time2}: the end of time segements; \item \code{id}: Identificators
+##'     of subjects; \item \code{event}: Event indicators; \item:
+##'     \code{terminal}: Indicators of terminal events.}
+##' @slot ID A charactrer vector for original identificators of subjects.
+##' @slot ord An integer vector for increasingly ordering data by \code{id},
+##'     \code{time2}, and \code{- event}.  Sorting is often done in the
+##'     model-fitting steps, where the indices stored in this slot can be used
+##'     directly.
+##' @slot rev_ord An integer vector for reverting the ordering of the sorted
+##'     data (by \code{ord}) to its original ordering.  This slot is provided to
+##'     easily revert the sorting.
+##' @slot first_idx An integer vector indicating the first record of each
+##'     subject in the sorted matrix.  It helps in the data checking produce and
+##'     may be helpful in model-fitting step, such as getting the origin time.
+##' @slot last_idx An integer vector indicating the last record of each subject
+##'     in the sorted data.  Similar to \code{first_idx}, it helps in the data
+##'     checking produce and may be helpful in the model-fitting step, such as
+##'     locating the terminal events.
+##' @slot check A character string indicating how the data checking is
+##'     performed.  It just records the option that users specified on data
+##'     checking.
+##'
+##' @seealso \code{\link{Recur}}
+##' @export
+setClass(
+    "Recur",
+    contains = "matrix",
+    slots = c(
+        ID = "factor",
+        ord = "integer",
+        rev_ord = "integer",
+        first_idx = "integer",
+        last_idx = "integer",
+        check = "character"
     )
 )
 

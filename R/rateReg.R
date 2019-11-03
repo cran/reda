@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ## collation after class.R
@@ -32,10 +30,10 @@ NULL
 ##' gamma prior. Spline (including piecewise constant) baseline hazard rate
 ##' function can be specified for the model fitting.
 ##'
-##' Function \code{\link{Survr}} in the formula response by default first checks
+##' Function \code{\link{Recur}} in the formula response by default first checks
 ##' the dataset and will report an error if the dataset does not fall into
 ##' recurrent event data framework.  Subject's ID will be pinpointed if its
-##' observation violates any checking rule. See \code{\link{Survr}} for all the
+##' observation violates any checking rule. See \code{\link{Recur}} for all the
 ##' checking rules.
 ##'
 ##' Function \code{rateReg} first constructs the design matrix from
@@ -83,7 +81,9 @@ NULL
 ##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
 ##'         start = list(), control = list(), contrasts = NULL, ...)
 ##'
-##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
+##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
+##'     The terminal events and risk-free episodes specified in \code{Recur}
+##'     will be ignored since the model does not support them.
 ##' @param data An optional data frame, list or environment containing the
 ##'     variables in the model.  If not found in data, the variables are taken
 ##'     from \code{environment(formula)}, usually the environment from which
@@ -161,60 +161,8 @@ NULL
 ##' Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
 ##' \emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 ##'
-##' @examples
-##' library(reda)
+##' @example inst/examples/ex_rateReg.R
 ##'
-##' ## constant rate function
-##' (constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
-##'
-##' ## six pieces' piecewise constant rate function
-##' (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-##'                       data = simuDat, subset = ID %in% 1:50,
-##'                       knots = seq.int(28, 140, by = 28)))
-##'
-##' ## fit rate function with cubic spline
-##' (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-##'                       knots = c(56, 84, 112), degree = 3))
-##'
-##' ## more specific summary
-##' summary(constFit)
-##' summary(piecesFit)
-##' summary(splineFit)
-##'
-##' ## model selection based on AIC or BIC
-##' AIC(constFit, piecesFit, splineFit)
-##' BIC(constFit, piecesFit, splineFit)
-##'
-##' ## estimated covariate coefficients
-##' coef(piecesFit)
-##' coef(splineFit)
-##'
-##' ## confidence intervals for covariate coefficients
-##' confint(piecesFit)
-##' confint(splineFit, "x1", 0.9)
-##' confint(splineFit, 1, 0.975)
-##'
-##' ## estimated baseline rate function
-##' splinesBase <- baseRate(splineFit)
-##' plot(splinesBase, conf.int = TRUE)
-##'
-##' ## estimated baseline mean cumulative function (MCF) from a fitted model
-##' piecesMcf <- mcf(piecesFit)
-##' plot(piecesMcf, conf.int = TRUE, col = "blueviolet")
-##'
-##' ## estimated MCF for given new data
-##' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
-##' splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
-##'                  groupLevels = c("Treatment", "Control"))
-##' plot(splineMcf, conf.int = TRUE, lty = c(1, 5))
-##'
-##' ## example of further customization by ggplot2
-##' library(ggplot2)
-##' plot(splineMcf) +
-##'     geom_ribbon(aes(x = time, ymin = lower,
-##'                     ymax = upper, fill = Group),
-##'                 data = splineMcf@MCF, alpha = 0.2) +
-##'     xlab("Days")
 ##' @seealso
 ##' \code{\link{summary,rateReg-method}} for summary of fitted model;
 ##' \code{\link{coef,rateReg-method}} for estimated covariate coefficients;
@@ -266,10 +214,10 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     mt <- attr(mf, "terms")
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
 
-    ## check response constructed from Survr
+    ## check response constructed from Recur
     resp <- stats::model.extract(mf, "response")
-    if (! is.Survr(resp))
-        stop("Response in the formula must be an 'Survr' object.")
+    if (! (is.Recur(resp) || is.Survr(resp)))
+        stop("Response in the formula must be an 'Recur' object.")
 
     ## number of covariates excluding intercept
     nBeta <- ncol(mm) - 1L
@@ -286,14 +234,17 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## for possible missing values in covaraites
     if (length(na.action <- attr(mf, "na.action"))) {
         ## update if there is missing value removed
-        resp@ord <- order(resp[, "ID"], resp[, "time"])
-        resp@ID <- resp@ID[- na.action]
+        attr(resp, "ID") <- attr(resp, "ID")[- na.action]
         ## check data for possible error caused by removal of missing values
         if (control4rateReg$verbose)
             message("Observations with missing value in covariates ",
                     "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
-        check_Survr(resp, check = TRUE)
+        if (is.Recur(resp)) {
+            resp <- check_Recur(resp, check = "hard")
+        } else {
+            resp <- check_Survr(resp, check = TRUE)
+        }
         if (control4rateReg$verbose)
             message("Done!")
     }
@@ -302,7 +253,16 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ord <- attr(resp, "ord")
     ## data matrix processed
     xMat <- mm[ord, - 1L, drop = FALSE]
-    dat <- as.data.frame(cbind(resp[ord, ], xMat))
+    dat <- if (is.Recur(resp)) {
+               as.data.frame(cbind(
+                   resp[ord, c("id", "time2", "event", "origin")], xMat
+               ))
+           } else {
+               as.data.frame(cbind(
+                   resp[ord, ], xMat
+               ))
+           }
+
     colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
     nObs <- nrow(dat)
 
@@ -470,13 +430,13 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     par_alpha <- par[(nBeta + 2L) : length(par)]
     expXBeta <-
         if (nBeta) {
-            as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+            as.numeric(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
         } else {
             rep(1, nrow(xMat))
         }
 
     ## baseline rate function
-    rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
+    rho_0_ij <- pmax(as.numeric(bMat_event %*% par_alpha), .Machine$double.eps)
     rho_i <- pmax(expXBeta[ind_event] * rho_0_ij, .Machine$double.eps)
     sum_log_rho_i <- sum(log(rho_i))
 
@@ -484,7 +444,7 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     sum_log_theta_j_1 <- sum(log(theta_j_1))
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
+    mu0i <- as.numeric(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
     sum_log_theta_mui <- sum((n_ij_theta <- n_ij + par_theta) * log(mui_theta))
@@ -528,13 +488,13 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
     n_ij_theta <- n_ij + par_theta
     par_alpha <- par[(nBeta + 2L) : length(par)]
-    expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+    expXBeta <- as.numeric(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
 
     ## baseline rate function
-    rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
+    rho_0_ij <- pmax(as.numeric(bMat_event %*% par_alpha), .Machine$double.eps)
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
+    mu0i <- as.numeric(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
 

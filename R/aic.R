@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ## collation after class.R
@@ -103,7 +101,7 @@ setMethod(f = "AIC", signature = "rateReg",
 ##' \code{help(BIC, stats)} for other details.
 ##'
 ##' @param object An object used to dispatch a method.
-##' @param ... Optionally more fitted model objects.
+##' @param ... More fitted model objects.
 ##' @return If just one object is provided, a numeric value representing
 ##' calculated BIC.
 ##' If multiple objects are provided, a data frame with rows

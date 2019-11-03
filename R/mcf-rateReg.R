@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ## collation after class.R and mcf-generic.R
@@ -103,8 +101,10 @@ setMethod(
                                      na.action = na.action,
                                      xlev = object@xlevels)
             na.action <- paste0("na.", class(attr(mf, "na.action")))
-            X <- stats::model.matrix(Terms, mf, contrasts.arg =
-                                                    object@contrasts$constracts)
+            X <- stats::model.matrix(
+                            Terms, mf,
+                            contrasts.arg = object@contrasts$constracts
+                        )
             ## remove intercept and deplicated rows
             X <- unique(base::subset(X, select = - `(Intercept)`))
             if (ncol(X) != nBeta)

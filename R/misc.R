@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ### some trivial internal functions ============================================
@@ -131,17 +129,46 @@ isLogicalOne <- function(x, sub_env = "grandparent", ...) {
     isLogicalVector(x, sub_env = sub_env, ...) && length(x) == 1L
 }
 
+## is `x` object of class `foo`?
 ## is x a Survr object
 is.Survr <- function(x) {
     is(x, "Survr")
 }
-
 ## is x a mcf.sample object
 is.mcf.formula <- function(x) {
     is(x, "mcf.formula")
 }
-
 ## is x a rateReg object
 is.rateReg <- function(x) {
     is(x, "rateReg")
+}
+
+## throw warnings if `...` is specified by mistake
+warn_dots <- function(...) {
+    dotsList <- list(...)
+    .fun_name <- as.character(sys.call(- 1L)[[1L]])
+    if (length(dotsList) > 0) {
+        list_names <- names(dotsList)
+        if (is.null(list_names)) {
+            warning(wrapMessages(
+                sprintf(paste("Some invalid argument(s) went into `...`",
+                              "of %s()"),
+                        .fun_name)
+            ), call. = FALSE)
+        } else {
+            list_names <- list_names[list_names != ""]
+            if (length(list_names) > 2) {
+                all_names <- paste(sprintf("'%s'", list_names), collapse = ", ")
+                all_names <- gsub("(.+), (.+)$", "\\1, and \\2", all_names)
+            } else {
+                all_names <- paste(sprintf("'%s'", list_names),
+                                   collapse = " and ")
+            }
+            warning(wrapMessages(
+                sprintf("Invalid argument %s went into `...` of %s()",
+                        all_names, .fun_name)
+            ), call. = FALSE)
+        }
+    }
+    invisible(NULL)
 }

@@ -1,21 +1,19 @@
-################################################################################
 ##
-##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2017
+## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+## Copyright (C) 2015-2019
 ##
-##   This file is part of the R package reda.
+## This file is part of the R package reda.
 ##
-##   The R package reda is free software: You can redistribute it and/or
-##   modify it under the terms of the GNU General Public License as published
-##   by the Free Software Foundation, either version 3 of the License, or
-##   any later version (at your option). See the GNU General Public License
-##   at <http://www.gnu.org/licenses/> for details.
+## The R package reda is free software: You can redistribute it and/or
+## modify it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or any later
+## version (at your option). See the GNU General Public License at
+## <https://www.gnu.org/licenses/> for details.
 ##
-##   The R package reda is distributed in the hope that it will be useful,
-##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## The R package reda is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
-################################################################################
 
 
 ## collation after class.R
@@ -26,28 +24,35 @@ NULL
 ##' Mean Cumulative Function (MCF)
 ##'
 ##' An S4 class generic function that returns the mean cumulative function (MCF)
-##' estimates from a fitted model or returns the nonparametric MCF estimates
-##' (also called the Nelson-Aalen estimator) from the sample data.
+##' estimates from a fitted model or returns the nonparametric MCF estimates (by
+##' Nelson-Aalen estimator or Cook-Lawless cumulative sample mean estimator)
+##' from the sample data.
 ##'
-##' For \code{formula} object with \code{\link{Survr}} object as response, the
+##' For \code{formula} object with \code{\link{Recur}} object as response, the
 ##' covariate specified at the right hand side of the formula should be either
 ##' \code{1} or any "linear" conbination of categorical variable in the data.
 ##' The former computes the overall sample MCF.  The latter computes the sample
 ##' MCF for each level of the combination of the categorical variable(s)
-##' specified, respectively.  The sample MCF is also called Nelson-Aalen
-##' nonparametric estimator (Nelson 2003) and computed on each time point from
-##' sample data.  The point estimate of sample MCF at each time point does not
-##' assume any particular underlying model. The variance estimates at each time
-##' point is computed following the Lawless and Nadeau method (LawLess and
-##' Nadeau 1995), the Poisson process method, or the bootstrap methods.  The
-##' approximate confidence intervals are provided as well, which are constructed
-##' based on the asymptotic normality of the MCF itself (by default) or the
-##' logarithm of MCF.
+##' specified, respectively.
 ##'
-##' For \code{rateReg} object, \code{mcf} estimates the baseline
-##' MCF and its confidence interval at each time grid if argument \code{newdata}
-##' is not specified.  Otherwise, \code{mcf} estimates MCF and its confidence
-##' interval for the given newdata based on Delta-method.
+##' The MCF estimates are computed on each unique time point of the sample data.
+##' By default, the size of risk set is adjusted over time based on the at-risk
+##' indicators, which results in the Nelson-Aalen nonparametric estimator
+##' (Nelson 2003).  If the size of risk set remains a constant (total number of
+##' processes) over time (specified by \code{adjustRiskset = FALSE}), the
+##' cumulative sample mean (CSM) function introduced in Chapter 1 of Cook and
+##' Lawless (2007) will be computed instead.  The point estimate of sample MCF
+##' at each time point does not assume any particular underlying model. The
+##' variance estimates at each time point is computed following the Lawless and
+##' Nadeau method (LawLess and Nadeau 1995), the Poisson process method, or the
+##' bootstrap methods.  The approximate confidence intervals are provided as
+##' well, which are constructed based on the asymptotic normality of the MCF
+##' itself (by default) or the logarithm of MCF.
+##'
+##' For \code{rateReg} object, \code{mcf} estimates the baseline MCF and its
+##' confidence interval at each time grid if argument \code{newdata} is not
+##' specified.  Otherwise, \code{mcf} estimates MCF and its confidence interval
+##' for the given \code{newdata} based on Delta-method.
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param na.action A function that indicates what should the procedure do if
@@ -142,6 +147,9 @@ NULL
 ##'
 ##' @references
 ##'
+##' Cook, R. J., and Lawless, J. (2007). \emph{The statistical analysis of
+##' recurrent events}, Springer Science & Business Media.
+##'
 ##' Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
 ##' Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
 ##'
@@ -152,70 +160,9 @@ NULL
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{mcfDiff}} for comparing two-sample MCFs.
 ##' \code{\link{plot-method}} for plotting MCF.
-##' @examples
-##' library(reda)
 ##'
-##' ### sample MCF
-##' ## Example 1. valve-seat data
-##' ## the default variance estimates by Lawless and Nadeau (1995) method
-##' valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
-##' plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
-##'     ggplot2::xlab("Days") + ggplot2::theme_bw()
+##' @example inst/examples/ex_mcf.R
 ##'
-##' ## variance estimates following Poisson process model
-##' valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
-##'                  data = valveSeats, variance = "Poisson")
-##' ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
-##' valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1,
-##'                  data = valveSeats, variance = "bootstrap",
-##'                  control = list(B = 2e2))
-##'
-##' ## comparing the variance estimates from different methods
-##' library(ggplot2)
-##' ciDat <- rbind(cbind(valveMcf0@MCF, Method = "Lawless & Nadeau"),
-##'                cbind(valveMcf1@MCF, Method = "Poisson"),
-##'                cbind(valveMcf2@MCF, Method = "Bootstrap"))
-##' ggplot(ciDat, aes(x = time, y = se)) +
-##'     geom_step(aes(color = Method, linetype = Method)) +
-##'     xlab("Days") + ylab("SE estimates") + theme_bw()
-##'
-##' ## comparing the confidence interval estimates from different methods
-##' ggplot(ciDat, aes(x = time)) +
-##'     geom_step(aes(y = MCF)) +
-##'     geom_step(aes(y = lower, color = Method, linetype = Method)) +
-##'     geom_step(aes(y = upper, color = Method, linetype = Method)) +
-##'     xlab("Days") + ylab("Confidence intervals") + theme_bw()
-##'
-##'
-##' ## Example 2. the simulated data
-##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
-##'                data = simuDat, ID %in% 1 : 50)
-##' plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
-##'      legendName = "Treatment & Gender")
-##'
-##' ### estimate MCF difference between two groups
-##' ## one sample MCF object of two groups
-##' mcf0 <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-##' ## two-sample pseudo-score tests
-##' mcfDiff.test(mcf0)
-##' ## difference estimates over time
-##' mcf0_diff <- mcfDiff(mcf0, testVariance = "none")
-##' plot(mcf0_diff)
-##'
-##' ## or explicitly ask for the difference of two sample MCF
-##' mcf1 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
-##'             subset = group %in% "Contr")
-##' mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
-##'             subset = group %in% "Treat")
-##' ## perform two-sample tests and estimate difference at the same time
-##' mcf12_diff1 <- mcfDiff(mcf1, mcf2)
-##' mcf12_diff2 <- mcf1 - mcf2   # or equivalently using the `-` method
-##' stopifnot(all.equal(mcf12_diff1, mcf12_diff2))
-##' mcf12_diff1
-##' plot(mcf12_diff1)
-##'
-##' ### For estimated MCF from a fitted model,
-##' ### see examples given in function rateReg.
 ##' @export
 setGeneric(name = "mcf",
            def = function(object, ...) {
