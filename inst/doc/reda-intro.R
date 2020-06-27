@@ -1,13 +1,13 @@
-## ----setup, echo = c(1, 2)-----------------------------------------------
+## ----setup, echo = c(1, 2)----------------------------------------------------
 library(reda)
 packageVersion("reda")
 knitr::opts_chunk$set(fig.height = 5, fig.width = 7)
 
-## ----data----------------------------------------------------------------
+## ----data---------------------------------------------------------------------
 head(simuDat)
 str(simuDat)
 
-## ----sampleMcf-----------------------------------------------------------
+## ----sampleMcf----------------------------------------------------------------
 ## Example 1. valve-seat data
 valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 
@@ -15,7 +15,7 @@ valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 simuMcf <- mcf(Recur(time, ID, event) ~ group + gender,
                data = simuDat, subset = ID %in% seq_len(50))
 
-## ----plot:sampleMcf------------------------------------------------------
+## ----plot-sampleMcf-----------------------------------------------------------
 ## overall sample MCF for valve-seat data in Nelson (1995)
 plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE, col = 2) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
@@ -23,7 +23,7 @@ plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE, col = 2) +
 ## sample MCF for different groups (the default theme)
 plot(simuMcf, conf.int = TRUE, lty = 1:4, legendName = "Treatment & Gender")
 
-## ----plot:mcfSE----------------------------------------------------------
+## ----plot-mcfSE---------------------------------------------------------------
 ## Poisson process method
 valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, variance = "Poisson")
 
@@ -41,7 +41,7 @@ ggplot(ciDat, aes(x = time, y = se)) +
     geom_step(aes(color = Method, linetype = Method)) +
     xlab("Days") + ylab("SE estimates") + theme_bw()
 
-## ----plot:mcfCI----------------------------------------------------------
+## ----plot-mcfCI---------------------------------------------------------------
 ## comparing the confidence intervals
 ggplot(ciDat, aes(x = time)) +
     geom_step(aes(y = MCF), color = "grey") +
@@ -49,33 +49,33 @@ ggplot(ciDat, aes(x = time)) +
     geom_step(aes(y = upper, color = Method, linetype = Method)) +
     xlab("Days") + ylab("Confidence intervals") + theme_bw()
 
-## ----mcfDiff1------------------------------------------------------------
+## ----mcfDiff1-----------------------------------------------------------------
 ## one sample MCF object of two groups
 mcf0 <- mcf(Recur(time, ID, event) ~ group, data = simuDat)
 (mcf_diff0 <- mcfDiff(mcf0))
 
-## ----mcfDiff2------------------------------------------------------------
+## ----mcfDiff2-----------------------------------------------------------------
 ## explicitly ask for the difference of two sample MCF
 mcf1 <- mcf(Recur(time, ID, event) ~ 1, simuDat, group %in% "Contr")
 mcf2 <- mcf(Recur(time, ID, event) ~ 1, simuDat, group %in% "Treat")
 mcf1 - mcf2
 
-## ----plot:mcfDiff--------------------------------------------------------
+## ----plot-mcfDiff-------------------------------------------------------------
 plot(mcf_diff0)
 
-## ----const---------------------------------------------------------------
+## ----const--------------------------------------------------------------------
 (constFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat))
 
-## ----twoPieces-----------------------------------------------------------
+## ----twoPieces----------------------------------------------------------------
 # two pieces' constant rate function
 (twoPiecesFit <- rateReg(Recur(time, ID, event) ~ group + x1, df = 2,
                          data = simuDat, subset = ID %in% 1:50))
 
-## ----sixPieces-----------------------------------------------------------
+## ----sixPieces----------------------------------------------------------------
 (piecesFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       knots = seq(from = 28, to = 140, by = 28)))
 
-## ----spline--------------------------------------------------------------
+## ----spline-------------------------------------------------------------------
 ## internal knots are set as 33% and 67% quantiles of time variable
 (splineFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       df = 6, degree = 3, spline = "mSplines"))
@@ -83,37 +83,37 @@ plot(mcf_diff0)
 (splineFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       spline = "bSp", degree = 3L, knots = c(56, 112)))
 
-## ----summary-------------------------------------------------------------
+## ----summary------------------------------------------------------------------
 summary(constFit)
 summary(piecesFit, showCall = FALSE)
 summary(splineFit, showCall = FALSE, showKnots = FALSE)
 
-## ----est-----------------------------------------------------------------
+## ----est----------------------------------------------------------------------
 ## point estimates of covariate coefficients
 coef(splineFit)
 ## confidence interval for covariate coefficients
 confint(splineFit, level = 0.95)
 
-## ----modelSelect---------------------------------------------------------
+## ----modelSelect--------------------------------------------------------------
 AIC(constFit, piecesFit, splineFit)
 BIC(constFit, piecesFit, splineFit)
 
-## ----baseRate------------------------------------------------------------
+## ----baseRate-----------------------------------------------------------------
 baseRateObj <- baseRate(splineFit)
 plot(baseRateObj, conf.int = TRUE)
 
-## ----piecesMcf-----------------------------------------------------------
+## ----piecesMcf----------------------------------------------------------------
 piecesMcf <- mcf(piecesFit)
 plot(piecesMcf, conf.int = TRUE, col = "blueviolet") + xlab("Days")
 
-## ----splineMcf-----------------------------------------------------------
+## ----splineMcf----------------------------------------------------------------
 newDat <- data.frame(x1 = c(0, 0), group = c("Treat", "Contr"))
 estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
               groupLevels = c("Treatment", "Control"))
 plot(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
     ggtitle("Control vs. Treatment") + xlab("Days")
 
-## ----plot:ribbon---------------------------------------------------------
+## ----plot-ribbon--------------------------------------------------------------
 plot(estmcf) +
     geom_ribbon(data = estmcf@MCF, alpha = 0.2,
                 aes(x = time, ymin = lower, ymax = upper, fill = Group)) +

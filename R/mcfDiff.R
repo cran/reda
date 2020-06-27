@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2019
+## Copyright (C) 2015-2020
 ##
 ## This file is part of the R package reda.
 ##
@@ -58,9 +58,7 @@ NULL
 ##' (2007, Section 3.7.5) for more details.
 ##'
 ##' @aliases mcfDiff
-##'
-##' @usage
-##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
+##' @aliases -,mcf.formula,mcf.formula-method
 ##'
 ##' @param mcf1 A \code{mcf.formula} object representing the MCF for one or two
 ##'     groups.
@@ -216,13 +214,6 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 }
 
 
-##' @rdname mcfDiff
-##' @aliases `-`,mcf.formula-method
-##'
-##' @param e1 The first \code{mcf.formula} object, \code{mcf1}.
-##' @param e2 The second \code{mcf.formula} object, \code{mcf2}.
-##'
-##' @export
 setMethod(
     f = "-",
     signature = c("mcf.formula", "mcf.formula"),
@@ -239,10 +230,6 @@ setMethod(
 
 ##' @rdname mcfDiff
 ##' @aliases mcfDiff.test
-##'
-##' @usage
-##' mcfDiff.test(mcf1, mcf2 = NULL,
-##'              testVariance = c("robust", "Poisson", "none"), ...)
 ##'
 ##' @param testVariance A character string specifying the method for computing
 ##'     the variance estimate for the pseudo-score test statistic proposed by

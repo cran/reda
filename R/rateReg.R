@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2019
+## Copyright (C) 2015-2020
 ##
 ## This file is part of the R package reda.
 ##
@@ -76,11 +76,6 @@ NULL
 ##'         from this function.
 ##' }
 ##'
-##' @usage
-##' rateReg(formula, data, subset, df = NULL, knots = NULL,
-##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
-##'         start = list(), control = list(), contrasts = NULL, ...)
-##'
 ##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
 ##'     The terminal events and risk-free episodes specified in \code{Recur}
 ##'     will be ignored since the model does not support them.
@@ -100,10 +95,10 @@ NULL
 ##'     spline bases.
 ##' @param na.action A function that indicates what should the procedure do if
 ##'     the data contains \code{NA}s.  The default is set by the na.action
-##'     setting of \code{\link[base]{options}}.  The "factory-fresh" default is
-##'     \code{\link[stats]{na.omit}}.  Other possible values inlcude
-##'     \code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
-##'     \code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.
+##'     setting of \code{options}.  The "factory-fresh" default is
+##'     \code{na.omit}.  Other possible values inlcude
+##'     \code{na.fail}, \code{na.exclude}, and
+##'     \code{na.pass}.  \code{help(na.fail)} for details.
 ##' @param spline An optional character that specifies the flavor of splines.
 ##'     The possible option is \code{bSplines} for B-splines or \code{mSplines}
 ##'     for M-splines.
@@ -116,8 +111,7 @@ NULL
 ##'     matrices or character strings naming functions) to be used as
 ##'     replacement values for the contrasts replacement function and whose
 ##'     names are the names of columns of data containing factors.  See
-##'     \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}} for
-##'     details.
+##'     \code{contrasts.arg} of \code{model.matrix.default} for details.
 ##' @param ... Other arguments for future usage.
 ##'
 ##' @return A \code{rateReg} object, whose slots include

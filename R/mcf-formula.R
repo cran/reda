@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2019
+## Copyright (C) 2015-2020
 ##
 ## This file is part of the R package reda.
 ##
@@ -33,10 +33,11 @@ NULL
 ##' @param variance A character specifying the method for variance estimates.
 ##'     The available options are \code{"LawlessNadeau"} (the default) for
 ##'     Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
-##'     method, \code{"bootstrap"} for bootstrap method, and \code{"CSV"} for
+##'     method, \code{"bootstrap"} for bootstrap method, \code{"CSV"} for
 ##'     variance estimates of the corresponding cumulative sample mean function
-##'     (CSM) by the cumulative sample variance method (Cook and Lawless, 2007).
-##'     Partial matching on the names is allowed.
+##'     (CSM) by the cumulative sample variance method (Cook and Lawless, 2007),
+##'     and \code{"none"} for no variance estimates.  Partial matching on the
+##'     names is allowed.
 ##' @param logConfInt A logical value. If \code{FALSE} (the default), the
 ##'     confidence interval are constructed based on the normality of the MCF
 ##'     estimates. Otherwise, the confidence intervals of given level are
@@ -56,7 +57,7 @@ setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
                           variance = c("LawlessNadeau", "Poisson",
-                                       "bootstrap", "CSV"),
+                                       "bootstrap", "CSV", "none"),
                           logConfInt = FALSE, adjustRiskset = TRUE,
                           level = 0.95, control = list(), ...)
     {
@@ -127,6 +128,10 @@ setMethod(
             variance,
             c("LawlessNadeau", "Poisson", "bootstrap", "CSV")
         )
+        ## no variance estimates otherwise
+        if (is.na(var_method)) {
+            var_method <- 0L
+        }
         ci_method <- if (variance == "bootstrap" &&
                          control$ci.method == "percentile") {
                          3
@@ -278,21 +283,24 @@ sMcf <- function(inpDat, point_method, var_method, ci_method, ci_level,
         ), call. = FALSE)
     }
     ## call cpp routine
-    res_list <- with(
-        inpDat,
-        cpp_np_mcf(
-            time1 = inpDat$time1,
-            time2 = inpDat$time2,
-            id = inpDat$id,
-            event = inpDat$event,
-            point_method = point_method,
-            var_method = var_method,
-            ci_method = ci_method,
-            ci_level = ci_level,
-            var_bootstrap_method = var_bootstrap_method,
-            var_bootstrap_B = var_bootstrap_B
-            )
+    res_list <- cpp_np_mcf(
+        time1 = inpDat$time1,
+        time2 = inpDat$time2,
+        id = inpDat$id,
+        event = inpDat$event,
+        point_method = point_method,
+        var_method = var_method,
+        ci_method = ci_method,
+        ci_level = ci_level,
+        var_bootstrap_method = var_bootstrap_method,
+        var_bootstrap_B = var_bootstrap_B
     )
+    ## if no variance estimate, set ci and se to NA
+    if (var_method == 0L) {
+        nout <- length(res_list$jump_time)
+        res_list$se_cum_rate <- res_list$lower_cum_rate <-
+            res_list$upper_cum_rate <- rep(NA_real_, nout)
+    }
     ## return
     data.frame(
         time = res_list$jump_time,
@@ -313,14 +321,16 @@ mcf_formula_control <- function(B = 2e2,
                                 verbose = TRUE,
                                 ...)
 {
-    if (! isNumOne(B, error_na = TRUE) || B <= 1)
+    if (! isNumOne(B, error_na = TRUE) || B < 2)
         stop(wrapMessages(
-            "The number of bootstarp sample, 'B' should be a numeric number."
+            "The number of bootstarp samples 'B'",
+            "should be a postive integer > 1."
         ), call. = FALSE)
-    if (B < 30)
+    if (B < 30) {
         warning(wrapMessages(
             "A larger number of bootstarp samples is suggested."
         ), call. = FALSE)
+    }
     se.method <- match.arg(se.method)
     ci.method <- match.arg(ci.method)
     if (! isLogicalOne(keep.data, error_na = TRUE))

@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2019
+## Copyright (C) 2015-2020
 ##
 ## This file is part of the R package reda.
 ##
@@ -75,12 +75,6 @@ NULL
 ##'
 ##' @aliases simEvent
 ##'
-##' @usage
-##' simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-##'          frailty = 1, recurrent = TRUE, interarrival = "rexp",
-##'          relativeRisk = c("exponential", "linear", "excess", "none"),
-##'          method = c("thinning", "inversion"), arguments = list(), ...)
-##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
 ##'     vector for time-invariant covariates or a function of times that returns
@@ -128,7 +122,7 @@ NULL
 ##'     whether to generate recurrent event data or survival data.
 ##' @param interarrival A function object for randomly generating (positive)
 ##'     interarrival time between two successive arrivals/events.  The default
-##'     value is \code{"rexp"} (i.e., function \code{\link[stats]{rexp}}) for
+##'     value is \code{"rexp"} (i.e., function \code{stats::rexp}) for
 ##'     generating interarrival times following exponential distribution, which
 ##'     leads to a Poisson process. If the assumption of exponential
 ##'     interarrival times cannot be justified, we may consider a renewal
@@ -700,8 +694,6 @@ simEvent <- function(z = 0, zCoef = 1,
 
 ##' @rdname simEvent
 ##' @aliases simEventData
-##' @usage
-##' simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 ##'
 ##' @param nProcess Number of stochastic processes. If missing, the value will
 ##'     be the number of row of the specified matrix \code{z}. Otherwise, a
@@ -813,9 +805,6 @@ simEventData <- function(nProcess = 1,
 ##' matrix \code{z} and the \eqn{i_{th}} row of the coefficient matrix,
 ##' iteratively, for \eqn{i} from one to the number of rows of the covariate
 ##' matrix \code{z}.
-##'
-##' @usage
-##' parametrize(z, zCoef, FUN = c("exponential", "linear", "excess"), ...)
 ##'
 ##' @param z A numeric matrix, each row of which represents the covariate vector
 ##'     at one perticular time point.
