@@ -43,20 +43,13 @@ installing it with the help of **remotes** by
 
 ```R
 if (! require(remotes)) install.packages("remotes")
-remotes::install_github("wenjie2wang/reda")
+remotes::install_github("wenjie2wang/reda", upgrade = "never")
 ```
 
 
 ## License
 
-The R package reda is free software: You can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the Free
-Software Foundation, either version 3 of the License, or any later version (at
-your option).  See the [GNU General Public License][gpl-url] for details.
-
-The R package reda is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.
+[GNU General Public License][gpl] (≥ 3)
 
 
 [r-pkg-badge]: https://www.r-pkg.org/badges/version/reda
@@ -71,6 +64,6 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
 [reda-Recur]: https://wenjie-stat.me/reda/articles/reda-Recur.html
 [reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
-[gpl-url]: https://www.gnu.org/licenses/
+[gpl]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
