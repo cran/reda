@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -56,7 +56,8 @@ setClass(
 ##'     \code{time2}: the end of time segements; \item \code{id}: Identificators
 ##'     of subjects; \item \code{event}: Event indicators; \item:
 ##'     \code{terminal}: Indicators of terminal events.}
-##' @slot ID A charactrer vector for original identificators of subjects.
+##' @slot call A function call producing the object.
+##' @slot ID A character vector for unique original identificators of subjects.
 ##' @slot ord An integer vector for increasingly ordering data by \code{id},
 ##'     \code{time2}, and \code{- event}.  Sorting is often done in the
 ##'     model-fitting steps, where the indices stored in this slot can be used
@@ -74,6 +75,7 @@ setClass(
 ##' @slot check A character string indicating how the data checking is
 ##'     performed.  It just records the option that users specified on data
 ##'     checking.
+##' @slot time_class A character vector preserving the class(es) of input times.
 ##'
 ##' @seealso \code{\link{Recur}}
 ##' @export
@@ -81,12 +83,14 @@ setClass(
     "Recur",
     contains = "matrix",
     slots = c(
-        ID = "factor",
+        call = "call",
+        ID = "character",
         ord = "integer",
         rev_ord = "integer",
         first_idx = "integer",
         last_idx = "integer",
-        check = "character"
+        check = "character",
+        time_class = "character"
     )
 )
 
@@ -207,6 +211,34 @@ setClass(
         ## else return
         TRUE
     }
+)
+
+
+##' An S4 Class for Summarized Recur Object
+##'
+##' @slot call A function call.
+##' @slot sampleSize An integer representing the sample size (number of
+##'     subjects).
+##' @slot reSize An integer representing the number of recurrent events.
+##' @slot avgReSize A numeric value representing the average number of recurrent
+##'     events per subject.
+##' @slot propTem A numeric value representing the proportion of subjects having
+##'     terminal event.
+##' @slot medFU A numeric value for median follow-up time.
+##' @slot medTem A numeric value for median survival time of the terminal
+##'     events.
+##'
+##' @export
+setClass(
+    Class = "summary.Recur",
+    slots = c(
+        call = "call",
+        sampleSize = "integer",
+        reSize = "integer",
+        avgReSize = "numeric",
+        propTem = "numeric",
+        medFU = "numeric",
+        medTem = "numeric")
 )
 
 

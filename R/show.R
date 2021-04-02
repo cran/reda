@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -112,6 +112,32 @@ setMethod(f = "show", signature = "summary.rateReg",
               printCoefmat(object@baseRateCoef)
               cat("\nLoglikelihood: ", object@logL, "\n")
               ## invisible return
+              invisible(object)
+          })
+
+
+##' @rdname show-method
+##' @aliases show,summary.Recur-method
+##' @export
+setMethod(f = "show", signature = "summary.Recur",
+          definition = function(object) {
+              dg <- min(3, getOption("digits"))
+              cat("Call: \n")
+              print(object@call)
+              cat("\n")
+              cat("Sample size:                                   ",
+                  object@sampleSize, "\n")
+              cat("Number of recurrent event observed:            ",
+                  object@reSize, "\n")
+              cat("Average number of recurrent event per subject: ",
+                  round(object@avgReSize, dg), "\n")
+              cat("Proportion of subjects with a terminal event:  ",
+                  round(object@propTem, dg), "\n")
+              cat("Median follow-up time:                         ",
+                  round(median(object@medFU), dg), "\n")
+              if (! is.na(object@medTem))
+                  cat("Median time-to-terminal event:                 ",
+                      round(object@medTem, dg), "\n")
               invisible(object)
           })
 

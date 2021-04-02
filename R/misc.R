@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -35,7 +35,7 @@ na_warning <- function(x, sub_env = c("current", "parent", "grandparent"),
         "grandparent" = parent.frame(num_grandparent)
     )
     objName = deparse(substitute(x, sub_env))
-    if (any(is.na(x)))
+    if (anyNA(x))
         warning(wrapMessages(
             sprintf("Found `NA` values in `%s`.", objName)
         ), call. = FALSE)
@@ -53,7 +53,7 @@ na_stop <- function(x, sub_env = c("current", "parent", "grandparent"),
         "grandparent" = parent.frame(num_grandparent)
     )
     objName = deparse(substitute(x, sub_env))
-    if (any(is.na(x)))
+    if (anyNA(x))
         stop(wrapMessages(
             sprintf("Found `NA` values in `%s`.", objName)
         ), call. = FALSE)
@@ -146,8 +146,8 @@ is.rateReg <- function(x) {
 ## throw warnings if `...` is specified by mistake
 warn_dots <- function(...) {
     dotsList <- list(...)
-    .fun_name <- as.character(sys.call(- 1L)[[1L]])
     if (length(dotsList) > 0) {
+        .fun_name <- as.character(sys.call(- 1L)[[1L]])
         list_names <- names(dotsList)
         if (is.null(list_names)) {
             warning(wrapMessages(

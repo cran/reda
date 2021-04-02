@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -123,7 +123,7 @@ setMethod(
 
         ## update control list
         control <- do.call(mcf_formula_control, control)
-        point_method <- as.integer(adjustRiskset)
+        point_method <- 2L - as.integer(adjustRiskset)
         var_method <- match(
             variance,
             c("LawlessNadeau", "Poisson", "bootstrap", "CSV")
@@ -147,16 +147,16 @@ setMethod(
 
         ## for possible missing values in covaraites
         if (length(na.action <- attr(mf, "na.action"))) {
-            ## update if there is missing value removed
-            attr(resp, "ID") <- attr(resp, "ID")[- na.action]
             ## check data for possible error caused by removal of missing values
             if (control$verbose)
                 message("Observations with missing value in covariates ",
                         "are removed.\nChecking the new dataset again...\n",
                         appendLF = FALSE)
             if (is.Recur(resp)) {
-                resp <- check_Recur(resp)
+                resp <- check_Recur(resp, check = "hard")
             } else {
+                ## update if there is missing value removed
+                attr(resp, "ID") <- attr(resp, "ID")[- na.action]
                 resp <- check_Survr(resp, check = TRUE)
             }
             if (control$verbose)
@@ -197,7 +197,7 @@ setMethod(
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
             ## revert subject ID
-            dat$id <- attr(resp, "ID")
+            dat$id <- attr(resp, "ID")[dat$id]
 
             return(
                 new("mcf.formula",
@@ -249,7 +249,7 @@ setMethod(
         ## whether to keep data in output
         if (control$keep.data) {
             ## revert subject ID
-            dat$id <- attr(resp, "ID")
+            dat$id <- attr(resp, "ID")[dat$id]
         } else {
             dat <- data.frame()
         }

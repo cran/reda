@@ -18,7 +18,9 @@ objects of this class.  See ``Slots'' for details.
 of subjects; \item \code{event}: Event indicators; \item:
 \code{terminal}: Indicators of terminal events.}}
 
-\item{\code{ID}}{A charactrer vector for original identificators of subjects.}
+\item{\code{call}}{A function call producing the object.}
+
+\item{\code{ID}}{A character vector for unique original identificators of subjects.}
 
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
 \code{time2}, and \code{- event}.  Sorting is often done in the
@@ -41,6 +43,8 @@ locating the terminal events.}
 \item{\code{check}}{A character string indicating how the data checking is
 performed.  It just records the option that users specified on data
 checking.}
+
+\item{\code{time_class}}{A character vector preserving the class(es) of input times.}
 }}
 
 \seealso{

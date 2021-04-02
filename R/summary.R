@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -89,4 +89,43 @@ setMethod(f = "summary", signature = "rateReg",
                              logL = object@logL)
               ## return
               results
+          })
+
+
+##' Summarize an \code{Recur} object
+##'
+##' @param object An \code{Recur} object.
+##' @param ... Other arguments not used.
+##'
+##' @return \code{summary.Recur} object.
+##'
+##' @importFrom stats median
+##'
+##' @export
+setMethod(f = "summary", signature = "Recur",
+          definition = function(object, ...) {
+              Call <- object@call
+              n <- length(object@first_idx)
+              d0 <- object@.Data[object@.Data[, "event"] == 0, ]
+              y <- d0[, "time2"] - d0[, "origin"]
+              d <- d0[, "terminal"]
+              oy <- order(y)
+              d <- d[oy]
+              y <- y[oy]
+              r <- n - rank(y, ties.method = "min") + 1
+              is_first_y <- ! duplicated(y)
+              s <- cumprod(1 - (d / r)[is_first_y])
+              medTem <- if (s[length(s)] > .5) {
+                            NA_real_
+                        } else {
+                            as.numeric(y[is_first_y][which.max(s - .5 < 0)])
+                        }
+              new("summary.Recur",
+                  call = Call,
+                  sampleSize = as.integer(n),
+                  reSize = as.integer(sum(object@.Data[, "event"] > 0)),
+                  avgReSize = sum(object@.Data[, "event"]) / n,
+                  propTem = sum(object@.Data[, "terminal"]) / n,
+                  medFU = median(y),
+                  medTem = medTem)
           })

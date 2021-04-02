@@ -22,7 +22,7 @@ head(ex3)
 
 ## ----ex-4---------------------------------------------------------------------
 ex4 <- Recur(list(time1 = left, time2 = right), id = c("A1", "A1", "A2"))
-stopifnot(all.equal(ex3, ex4))
+stopifnot(all.equal(ex3, ex4, check.attributes = FALSE))
 
 ## ----ex-5---------------------------------------------------------------------
 ex5 <- Recur(3:5, origin = 1, terminal = 1)
@@ -35,7 +35,7 @@ head(ex6)
 ## ----ex-7---------------------------------------------------------------------
 ex7 <- Recur(3:5, id = c("A1", "A1", "A2"),
              origin = c(1, 1, 2), terminal = c(0, 0, 1))
-stopifnot(all.equal(ex6, ex7))
+stopifnot(all.equal(ex6, ex7, check.attributes = FALSE))
 
 ## ----origin-terminal-err------------------------------------------------------
 try(Recur(1:10, origin = c(1, 2)))

@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2020
+## Copyright (C) 2015-2021
 ##
 ## This file is part of the R package reda.
 ##
@@ -105,40 +105,52 @@ Recur <- function(time, id, event, terminal, origin,
     ## warning on `...`
     warn_dots(...)
 
-    ## get check
-    check <- match.arg(check)
+    ## get check; make it faster by specifying choices
+    check <- match.arg(check, choices = c("hard", "soft", "none"))
 
     ## "time" cannot be missing
     if (missing(time)) {
         stop("The 'time' cannot be missing.")
     }
-    time1 <- NULL
-    time2 <- process_time(time)
+
     ## is time1 contained inside of a list of "time"
     if (is.list(time)) {
-        time1 <- process_time(time$time1)
-        time2 <- process_time(time$time2)
+        time1 <- process_time(time$time1, allow_null = TRUE)
+        time2 <- process_time(time$time2, allow_null = FALSE)
+        cl1 <- class(time$time1)
+        cl2 <- class(time$time2)
+        if (! isTRUE(all.equal.character(cl1, cl2, check.attributes = FALSE))) {
+            warning("The 'time1' and 'time2' do not have the same class.")
+        }
+        time_class <- union(cl1, cl2)
+    } else {
+        time1 <- NULL
+        time2 <- process_time(time, allow_null = FALSE)
+        time_class <- class(time)
     }
     nRec <- length(time2)
 
     ## "id" can be left unspecified but cannot contain NA's
     if (missing(id)) {
-        ord_id <- sorted_id <- id <- uid <- seq_along(time2)
-        ID <- factor(id)
-        nSubject <- length(time2)
+        first_idx <- last_idx <- ord_id <- sorted_id <-
+            id <- uid <- seq_len(nRec)
+        ID <- as.character(id)
+        nSubject <- nRec
     } else if (anyNA(id)) {
         stop("The 'id' cannot contain missing values.", call. = FALSE)
     } else {
         ## original id's in a character vector
-        ID <- factor(id)
-        id <- as.numeric(ID)
+        id_list <- rcpp_factorize(id)
+        ID <- id_list$ID
+        id <- id_list$id
+        ## ID[id] = input id
         uid <- unique(id)
         ord_id <- order(uid)
         sorted_id <- sort(id)
         nSubject <- length(uid)
+        first_idx <- which(! duplicated(sorted_id))
+        last_idx <- which(! duplicated(sorted_id, fromLast = TRUE))
     }
-    first_idx <- ! duplicated(sorted_id)
-    last_idx <- ! duplicated(sorted_id, fromLast = TRUE)
 
     ## "event" can be left unspecified
     ## sort the data by id, time1, time2, and event
@@ -158,7 +170,8 @@ Recur <- function(time, id, event, terminal, origin,
     } else {
         ord <- order(id, time2)
         ## all one's before one zero at the end for each id
-        sorted_event <- 1 - as.numeric(last_idx)
+        sorted_event <- rep.int(1, nRec)
+        sorted_event[last_idx] <- 0
     }
     sorted_time2 <- time2[ord]
 
@@ -168,13 +181,7 @@ Recur <- function(time, id, event, terminal, origin,
         if (missing(origin)) {
             sorted_origin <- origin <- 0
         } else {
-            if (inherits(origin, "Date")) {
-                origin <- as.numeric(origin)
-            }
-            if (! isNumVector(origin)) {
-                stop("Invalid 'origin'! See '?Recur' for details.",
-                     call. = FALSE)
-            }
+            origin <- process_time(origin, allow_null = TRUE)
             ## check the length of 'origin'
             len_origin <- length(origin)
             if (len_origin == nRec) {
@@ -182,12 +189,12 @@ Recur <- function(time, id, event, terminal, origin,
                 origin <- sorted_origin[first_idx]
             } else if (len_origin == nSubject) {
                 origin <- origin[ord_id]
-                sorted_origin <- origin[match(sorted_id, uid[ord_id])]
+                sorted_origin <- origin[sorted_id]
             } else if (len_origin == 1L) {
                 sorted_origin <- origin
             } else {
                 stop(wrapMessages(
-                    "Invalid length for `origin`. See '?Recur' for details."
+                    "Invalid length for 'origin'. See '?Recur' for details."
                 ), call. = FALSE)
             }
         }
@@ -197,19 +204,19 @@ Recur <- function(time, id, event, terminal, origin,
         ## throw warning if origin is specified
         if (! missing(origin)) {
             warning(wrapMessages(
-                "The specified 'origin' was ignored given 'time1'."
+                "The specified 'origin' was ignored due to given 'time1'."
             ), call. = FALSE)
         }
         sorted_time1 <- time1[ord]
         origin <- sorted_time1[first_idx]
-        sorted_origin <- origin[match(sorted_id, uid[ord_id])]
+        ## sorted_id can be also used as index
+        sorted_origin <- origin[sorted_id]
     }
 
     ## "terminal" can be left unspecified
-    ## all censoring by default
-    sorted_terminal <- rep(0, nRec)
     if (missing(terminal)) {
-        sorted_terminal[last_idx] <- 0
+        ## all censoring by default
+        sorted_terminal <- rep(0, nRec)
     } else {
         if (isLogicalVector(terminal, error_na = TRUE)) {
             terminal <- as.numeric(terminal)
@@ -221,14 +228,17 @@ Recur <- function(time, id, event, terminal, origin,
         len_terminal <- length(terminal)
         if (len_terminal == nRec) {
             sorted_terminal <- terminal[ord]
-        } else if (len_terminal == nSubject) {
-            sorted_terminal[last_idx] <- terminal[ord_id]
-        } else if (len_terminal == 1L) {
-            sorted_terminal[last_idx] <- terminal
         } else {
-            stop(wrapMessages(
-                "Invalid length for 'terminal'.  See '?Recur' for details."
-            ), call. = FALSE)
+            sorted_terminal <- rep(0, nRec)
+            if (len_terminal == nSubject) {
+                sorted_terminal[last_idx] <- terminal[ord_id]
+            } else if (len_terminal == 1L) {
+                sorted_terminal[last_idx] <- terminal
+            } else {
+                stop(wrapMessages(
+                    "Invalid length for 'terminal'.  See '?Recur' for details."
+                ), call. = FALSE)
+            }
         }
     }
 
@@ -246,12 +256,14 @@ Recur <- function(time, id, event, terminal, origin,
     ## create Recur object for checking
     out <- methods::new("Recur",
                         .Data = sorted_mat[rev_ord, , drop = FALSE],
+                        call = match.call(),
                         ID = ID,
                         ord = ord,
                         rev_ord = rev_ord,
-                        first_idx = which(first_idx[rev_ord]),
-                        last_idx = which(last_idx[rev_ord]),
-                        check = check)
+                        first_idx = first_idx,
+                        last_idx = last_idx,
+                        check = check,
+                        time_class = time_class)
 
     ## perform optional checks
     check_Recur(out, check = check)
@@ -259,7 +271,6 @@ Recur <- function(time, id, event, terminal, origin,
     ## return
     out
 }
-
 
 ##' Checks for Recurrent Event Data
 ##'
@@ -270,7 +281,7 @@ Recur <- function(time, id, event, terminal, origin,
 ##' @inheritParams Recur
 ##' @param x An \code{Recur} object.
 ##'
-##' @return An \code{Recur} object.
+##' @return An \code{Recur} object invisibly.
 ##' @export
 check_Recur <- function(x, check = c("hard", "soft", "none"))
 {
@@ -280,121 +291,115 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
     }
 
     ## get check
-    x@check <- check <- match.arg(check)
+    x@check <- check <- match.arg(check, choices = c("hard", "soft", "none"))
 
     ## determine whether some rows in x has been removed
     n_row <- nrow(x@.Data)
-    slots_need_check <- c("ID", "ord", "rev_ord", "first_idx", "last_idx")
-    is_obj_diff <- any(vapply(slots_need_check, function(a) {
-        length(attr(x, a)) != n_row
-    }, FUN.VALUE = logical(1), USE.NAMES = FALSE))
+    is_obj_diff <- length(attr(x, "ord")) != n_row ||
+        length(attr(x, "rev_ord")) != n_row
 
     ## if data input has an attr 'ID' for internal usage
     if (is_obj_diff) {
-        ## update ID
-        attr_id <- as.numeric(x@ID)
-        match_idx <- match(attr_id, x[, "id"])
-        if (anyNA(match_idx)) {
-            warning("Found unknown ID.", call. = FALSE)
+        ## check ID
+        if (length(x@ID) > max(x[, "id"])) {
+            stop("Found unknown ID.")
         }
-        x@ID <- x@ID[match_idx]
         ## update ord and rev_ord
-        x@ord <- ord <- order(x[, "id"], x[, "time2"], - x[, "event"])
-        x@rev_ord <- order(ord)
+        x@ord <- order(x[, "id"], x[, "time2"], - x[, "event"])
+        x@rev_ord <- order(x@ord)
         ## update first_idx and last_idx
-        first_idx <- ! duplicated(x[ord, "id"])
-        x@first_idx <- which(first_idx[x@rev_ord])
-        last_idx <- ! duplicated(x[ord, "id"], fromLast = TRUE)
-        x@last_idx <- which(last_idx[x@rev_ord])
-    } else {
-        ord <- x@ord
-        first_idx <- x@first_idx[ord]
-        last_idx <- x@last_idx[ord]
+        sorted_id <- x[x@ord, "id"]
+        x@first_idx <- which(! duplicated.default(sorted_id))
+        x@last_idx <- which(! duplicated.default(sorted_id, fromLast = TRUE))
+        x@ID <- x@ID[sorted_id][x@first_idx]
     }
+    ## early exit
+    if (check == "none") {
+        return(invisible(x))
+    }
+
     ## sort data by id, time2, and - event
-    sObj <- x[ord, , drop = FALSE]
-    sID <- x@ID[ord]
+    sObj <- x@.Data[x@ord, , drop = FALSE]
+    sID <- x@ID[sObj[, "id"]]
     sTime1 <- sObj[, "time1"]
     sTime2 <- sObj[, "time2"]
     sEvent <- sObj[, "event"]
     sTerminal <- sObj[, "terminal"]
     sCensor <- sEvent <= 0
 
-    if (check != "none") {
-        msg_fun <- if (check == "hard") { stop } else { warning }
-        ## stop if event time after censoring time or without censoring time
-        idx <- ! sCensor[last_idx]
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having events at or after censoring:",
-                paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## stop if more than one terminal event time
-        terminalID <- sID[sTerminal > 0]
-        idx <- duplicated(terminalID)
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having multiple terminal events:",
-                paste0(paste(terminalID[idx], collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## stop if any terminal event happens before the last time
-        idx <- sTerminal[! last_idx] > 0
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having terminal events before censoring:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## the following check is not disabled for time-verying covariates
-        ## stop if more than one censoring time
-        ## cenID <- sID[sCensor]
-        ## idx <- duplicated(cenID)
-        ## if (any(idx)) {
-        ##     msg_fun(wrapMessages(
-        ##         "Subjects having multiple censoring times:",
-        ##         paste0(paste(cenID[idx], collapse = ", "), ".")
-        ##     ), call. = FALSE)
-        ## }
-
-        ## stop if missing value of 'time'
-        idx <- is.na(sTime1) | is.na(sTime2)
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Missing times!",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## 'time2' has to be later than the 'time1'
-        idx <- sTime2 < sTime1
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Event times must be >= origin.",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## 'time1' has to be not earlier than last 'time2'
-        lag_sTime2 <- c(NA, sTime2[- n_row])
-        lag_sTime2[first_idx] <- NA
-        idx <-  ! is.na(lag_sTime2) & sTime1 < lag_sTime2
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Recurrent episodes cannot be overlapped.",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
+    msg_fun <- if (check == "hard") { stop } else { warning }
+    ## stop if event time after censoring time or without censoring time
+    idx <- ! sCensor[x@last_idx]
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having events at or after censoring:",
+            paste0(paste(sID[x@last_idx][idx], collapse = ", "), ".")
+        ), call. = FALSE)
     }
-    ## return the (updated) xect
-    x
+
+    ## stop if more than one terminal event time
+    terminalID <- sID[sTerminal > 0]
+    idx <- duplicated(terminalID)
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having multiple terminal events:",
+            paste0(paste(terminalID[idx], collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## stop if any terminal event happens before the last time
+    idx <- sTerminal[- x@last_idx] > 0
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having terminal events before censoring:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## the following check is not disabled for time-verying covariates
+    ## stop if more than one censoring time
+    ## cenID <- sID[sCensor]
+    ## idx <- duplicated(cenID)
+    ## if (any(idx)) {
+    ##     msg_fun(wrapMessages(
+    ##         "Subjects having multiple censoring times:",
+    ##         paste0(paste(cenID[idx], collapse = ", "), ".")
+    ##     ), call. = FALSE)
+    ## }
+
+    ## stop if missing value of 'time'
+    idx <- is.na(sTime1) | is.na(sTime2)
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Missing times!",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## 'time2' has to be later than the 'time1'
+    idx <- sTime2 < sTime1
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Event times must be >= origin.",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## 'time1' has to be not earlier than last 'time2'
+    lag_sTime2 <- c(NA, sTime2[- n_row])
+    lag_sTime2[x@first_idx] <- NA
+    idx <-  ! is.na(lag_sTime2) & sTime1 < lag_sTime2
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Recurrent episodes cannot be overlapped.",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+    ## return the (updated) x
+    invisible(x)
 }
 
 
@@ -448,7 +453,7 @@ setMethod(f = "as.character", signature = "Recur",
               fmt <- sprintf("(%s.%df, %s.%df%s]",
                              "%", sigMax, "%", sigMax, "%s")
               sorted_dat <- x@.Data[x@ord, , drop = FALSE]
-              sorted_id <- x@ID[x@ord]
+              sorted_id <- x@ID[x@.Data[x@ord, "id"]]
               ## get options on max print
               max_print <- max(2L, as.integer(getOption("reda.Recur.maxPrint")))
               ## create a character vector representing the recurrent events
@@ -481,13 +486,20 @@ setMethod(f = "as.character", signature = "Recur",
 
 
 ## helper function to process 'time'
-process_time <- function(x) {
+process_time <- function(x, allow_null = TRUE) {
     ## skip if x is null or a list
-    if (is.null(x) || is.list(x)) return(x)
-    if (inherits(x, "difftime") || inherits(x, "Date"))
+    if (is.null(x)) {
+        if (allow_null) {
+            return(x)
+        } # else
+        stop("The 'time' cannot be 'NULL'.", call. = FALSE)
+    }
+    if (is.list(x))
+        return(x)
+    if (inherits(x, "difftime") || inherits(x, "Date") || inherits(x, "POSIXt"))
         x <- as.numeric(x)
     if (! is.numeric(x))
-        stop("Invalid times.  See '?Recur' for details.",
+        stop("Invalid 'time' variable.  See '?Recur' for details.",
              call. = FALSE)
     ## return
     x

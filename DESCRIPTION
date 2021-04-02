@@ -1,13 +1,13 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.5.2
-Date: 2020-07-07
+Version: 0.5.3
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
-           email = "wenjie.2.wang@uconn.edu",
+           email = "wang@wwenjie.org",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-0363-3180")),
     person(given = "Haoda", family = "Fu", role = "aut"),
+    person(given = "Sy Han (Steven)", family = "Chiou", role = "ctb"),
     person(given = "Jun", family = "Yan", role = "ctb",
            comment = c(ORCID = "0000-0003-4401-7296"))
     )
@@ -38,10 +38,11 @@ BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 NeedsCompilation: yes
-Packaged: 2020-07-08 02:47:23 UTC; wenjie
+Packaged: 2021-04-02 02:14:21 UTC; wenjie
 Author: Wenjie Wang [aut, cre] (<https://orcid.org/0000-0003-0363-3180>),
   Haoda Fu [aut],
+  Sy Han (Steven) Chiou [ctb],
   Jun Yan [ctb] (<https://orcid.org/0000-0003-4401-7296>)
-Maintainer: Wenjie Wang <wenjie.2.wang@uconn.edu>
+Maintainer: Wenjie Wang <wang@wwenjie.org>
 Repository: CRAN
-Date/Publication: 2020-07-08 06:30:02 UTC
+Date/Publication: 2021-04-02 15:00:02 UTC
