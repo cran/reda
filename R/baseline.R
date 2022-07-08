@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2021
+## Copyright (C) 2015-2022
 ##
 ## This file is part of the R package reda.
 ##
@@ -82,8 +82,6 @@ setMethod(
 
         ## time grid
         splinesList <- object@spline
-        knots <- splinesList$knots
-        degree <- splinesList$degree
         Boundary.knots <- splinesList$Boundary.knots
         controlist <- c(control, list(Boundary.knots_ = Boundary.knots))
         control <- do.call("rateReg_mcf_control", controlist)
@@ -93,16 +91,14 @@ setMethod(
         ## gridTime <- gridTime[gridTime < Boundary.knots[2L]]
 
         ## reconstruct spline basis matrix
-        bList <- list(x = gridTime, knots = knots, degree = degree,
-                      intercept = TRUE, Boundary.knots = Boundary.knots)
+        bList <- list(x = gridTime,
+                      knots = splinesList$knots,
+                      degree = splinesList$degree,
+                      intercept = TRUE,
+                      Boundary.knots = Boundary.knots,
+                      periodic = splinesList$periodic)
         splineName <- splinesList$spline
-        bMat <- if (splineName == "bSplines") {
-                    do.call(splines2::bSpline, bList)
-                } else if (splineName == "mSplines") {
-                    do.call(splines2::mSpline, bList)
-                } else {
-                    stop("Unknown splines type.")
-                }
+        bMat <- do.call(splines2::mSpline, bList)
 
         ## point estimates
         estVec <- as.numeric(bMat %*% alpha)

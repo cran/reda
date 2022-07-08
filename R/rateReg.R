@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2021
+## Copyright (C) 2015-2022
 ##
 ## This file is part of the R package reda.
 ##
@@ -60,21 +60,9 @@ NULL
 ##'     \item \code{alpha}: Coefficient(s) of baseline rate function,
 ##'         set to be all 0.05 by default.
 ##' }
-##' The argument \code{control} is an optional list
-##' that allows users to control the process of minimization of
-##' negative log likelihood function passed to \code{constrOptim}
-##' and specify the boundary knots of baseline rate function.
-##' The available options additional to those that can be passed from
-##' \code{control} to \code{constrOptim} include
-##' \itemize{
-##'     \item \code{Boundary.knots}: A length-two numeric vector to specify
-##'         the boundary knots for baseline rate funtion. By default,
-##'         the left boundary knot is the smallest origin time and
-##'         the right one takes the largest censoring time from data.
-##'     \item \code{verbose}: A optional logical value with default \code{TRUE}.
-##'         Set it to be \code{FALSE} to supress any possible message
-##'         from this function.
-##' }
+##' The argument \code{control} allows users to control the process of
+##' minimization of negative log likelihood function passed to
+##' \code{constrOptim} and specify the boundary knots of baseline rate function.
 ##'
 ##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
 ##'     The terminal events and risk-free episodes specified in \code{Recur}
@@ -85,23 +73,12 @@ NULL
 ##'     function \code{\link{rateReg}} is called.
 ##' @param subset An optional vector specifying a subset of observations to be
 ##'     used in the fitting process.
-##' @param df An optional nonnegative integer to specify the degree of freedom
-##'     of baseline rate function. If argument \code{knots} or \code{degree} are
-##'     specified, \code{df} will be neglected whether it is specified or not.
-##' @param knots An optional numeric vector that represents all the internal
-##'     knots of baseline rate function.  The default is \code{NULL},
-##'     representing no any internal knots.
-##' @param degree An optional nonnegative integer to specify the degree of
-##'     spline bases.
 ##' @param na.action A function that indicates what should the procedure do if
 ##'     the data contains \code{NA}s.  The default is set by the na.action
 ##'     setting of \code{options}.  The "factory-fresh" default is
-##'     \code{na.omit}.  Other possible values inlcude
-##'     \code{na.fail}, \code{na.exclude}, and
-##'     \code{na.pass}.  \code{help(na.fail)} for details.
-##' @param spline An optional character that specifies the flavor of splines.
-##'     The possible option is \code{bSplines} for B-splines or \code{mSplines}
-##'     for M-splines.
+##'     \code{na.omit}.  Other possible values inlcude \code{na.fail},
+##'     \code{na.exclude}, and \code{na.pass}. See \code{help(na.fail)} for
+##'     details.
 ##' @param start An optional list of starting values for the parameters to be
 ##'     estimated in the model.  See more in Section details.
 ##' @param control An optional list of parameters to control the maximization
@@ -112,7 +89,8 @@ NULL
 ##'     replacement values for the contrasts replacement function and whose
 ##'     names are the names of columns of data containing factors.  See
 ##'     \code{contrasts.arg} of \code{model.matrix.default} for details.
-##' @param ... Other arguments for future usage.
+##' @param ... Other arguments passed to \code{rateReg.control()} and
+##'     \code{stats::constrOptim()}.
 ##'
 ##' @return A \code{rateReg} object, whose slots include
 ##' \itemize{
@@ -167,18 +145,20 @@ NULL
 ##' \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
 ##' \code{\link{plot,mcf.rateReg-method}} for plotting estimated MCF.
 ##'
-##' @importFrom splines2 bSpline cSpline ibs iSpline mSpline
+##' @importFrom splines2 iSpline mSpline
 ##'
 ##' @importFrom stats .getXlevels constrOptim model.extract na.fail na.omit
 ##'     na.exclude na.pass predict deriv
 ##'
 ##' @export
-rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
-                    na.action, spline = c("bSplines", "mSplines"),
-                    start = list(), control = list(), contrasts = NULL, ...) {
+rateReg <- function(formula, data, subset, na.action,
+                    start = list(),
+                    control = list(),
+                    contrasts = NULL,
+                    ...)
+{
     ## record the function call to return
     Call <- match.call()
-    spline <- match.arg(spline)
     if (missing(formula))
         stop("Argument 'formula' is required.")
     if (missing(data))
@@ -221,14 +201,13 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     covar_names <- colnames(mm)[- 1L]
 
     ## 'control' for optimization and splines' boundary knots
-    control <- do.call("rateReg_control", control)
-    control4rateReg <- control$control4rateReg
-    control4optim <- control$control4optim
+    dot_list <- list(...)
+    control <- do.call(rateReg.control, modify_list(control, dot_list))
 
     ## for possible missing values in covaraites
     if (length(na.action <- attr(mf, "na.action"))) {
         ## check data for possible error caused by removal of missing values
-        if (control4rateReg$verbose)
+        if (control$verbose)
             message("Observations with missing value in covariates ",
                     "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
@@ -239,7 +218,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
             attr(resp, "ID") <- attr(resp, "ID")[- na.action]
             resp <- check_Survr(resp, check = TRUE)
         }
-        if (control4rateReg$verbose)
+        if (control$verbose)
             message("Done!")
     }
 
@@ -261,25 +240,22 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     nObs <- nrow(dat)
 
     ## set up boundary knots
-    Boundary.knots <- if (is.null(control4rateReg$Boundary.knots)) {
+    Boundary.knots <- if (is.null(control$Boundary.knots)) {
                           with(dat, c(min(origin, na.rm = TRUE),
                                       max(time, na.rm = TRUE)))
                       } else {
-                          control4rateReg$Boundary.knots
+                          control$Boundary.knots
                       }
 
     ## generate knots if knots is unspecified
-    if (spline == "bSplines") {
-        ## for B-spline
-        iMat <- splines2::ibs(x = dat$time, df = df, knots = knots,
-                              degree = degree, intercept = TRUE,
+    iMat <- splines2::mSpline(x = dat$time,
+                              df = control$df,
+                              knots = control$knots,
+                              degree = control$degree,
+                              intercept = TRUE,
+                              integral = TRUE,
+                              periodic = control$periodic,
                               Boundary.knots = Boundary.knots)
-    } else {
-        ## for M-spline
-        iMat <- splines2::iSpline(x = dat$time, df = df, knots = knots,
-                                  degree = degree, intercept = TRUE,
-                                  Boundary.knots = Boundary.knots)
-    }
     bMat <- deriv(iMat)
     iMat0 <- predict(iMat, dat$origin)
     iMat <- iMat - iMat0
@@ -287,10 +263,14 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## update df, knots, degree, and Boundary.knots
     knots <- as.numeric(attr(iMat, "knots"))
     degree <- as.integer(attr(iMat, "degree"))
-    df <- degree + length(knots) + 1L
+    df <- if (control$periodic) {
+              length(knots) + 1L
+          } else {
+              degree + length(knots) + 1L
+          }
     Boundary.knots <- attr(iMat, "Boundary.knots")
     ## name each basis for alpha output
-    alphaName <- nameBases(df = df, spline = spline)
+    alphaName <- nameBases(df)
 
     ## start' values
     startlist <- c(start, list(nBeta_ = nBeta, nAlpha_ = df))
@@ -326,6 +306,9 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## log likelihood
     ## theta > 0 and alph >= 0
+    spline_controls <- c("df", "degree", "knots", "Boundary.knots",
+                         "periodic", "verbose")
+    control4optim <- control[! names(control) %in% spline_controls]
     fit <- stats::constrOptim(ini, f = logL_rateReg, grad = logL_rateReg_grad,
                               ui = cbind(matrix(0, length_par - nBeta, nBeta),
                                          diag(length_par - nBeta)),
@@ -395,11 +378,14 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                  call = Call,
                  formula = formula,
                  nObs = nObs,
-                 spline = list(spline = spline,
-                               df = df,
-                               knots = knots,
-                               degree = degree,
-                               Boundary.knots = Boundary.knots),
+                 spline = list(
+                     spline = "mSplines",
+                     df = df,
+                     knots = knots,
+                     degree = degree,
+                     periodic = control$periodic,
+                     Boundary.knots = Boundary.knots
+                 ),
                  estimates = list(beta = est_beta,
                                   theta = est_theta,
                                   alpha = est_alpha),
@@ -411,6 +397,52 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                  convergCode = fit$convergence,
                  logL = - fit$value,
                  fisher = fit$hessian)
+}
+
+
+##' @rdname rateReg
+##'
+##' @param df A nonnegative integer to specify the degree of freedom of baseline
+##'     rate function. If argument \code{knots} or \code{degree} are specified,
+##'     \code{df} will be neglected whether it is specified or not.
+##' @param degree A nonnegative integer to specify the degree of spline bases.
+##' @param knots A numeric vector that represents all the internal knots of
+##'     baseline rate function.  The default is \code{NULL}, representing no any
+##'     internal knots.
+##' @param Boundary.knots A length-two numeric vector to specify the boundary
+##'     knots for baseline rate funtion. By default, the left boundary knot is
+##'     the smallest origin time and the right one takes the largest censoring
+##'     time from data.
+##' @param periodic A logical value indicating if periodic splines should be
+##'     used.
+##' @param verbose A logical value with default \code{TRUE}.  Set it to
+##'     \code{FALSE} to supress messages from this function.
+##'
+##' @export
+rateReg.control <- function(df = NULL,
+                            degree = 0L,
+                            knots = NULL,
+                            Boundary.knots = NULL,
+                            periodic = FALSE,
+                            verbose = TRUE,
+                            ...)
+{
+    if (! isLogicalOne(verbose))
+        stop("The option 'verbose' must be a logical value.", call. = FALSE)
+    ## available control parameters for optim
+    optim_controls <- c("trace", "fnscale", "parscale", "ndeps", "maxit",
+                        "abstol", "reltol", "alpha", "REPORT", "type", "lmm",
+                        "factr", "pgtol", "temp", "tmax")
+    dot_list <- list(...)
+    dot_list <- dot_list[names(dot_list) %in% optim_controls]
+    ## return
+    out <- list(df = df,
+                degree = degree,
+                knots = knots,
+                Boundary.knots = Boundary.knots,
+                periodic = periodic,
+                verbose = verbose)
+    c(out, dot_list)
 }
 
 
@@ -515,18 +547,6 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 }
 
 
-rateReg_control <- function(Boundary.knots = NULL,
-                            verbose = TRUE, ...)
-{
-    if (! isLogicalOne(verbose))
-        stop("The option 'verbose' must be a logical value.", call. = FALSE)
-    ## return
-    list(control4rateReg = list(Boundary.knots = Boundary.knots,
-                                verbose = verbose),
-         control4optim = list(...))
-}
-
-
 rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_)
 {
     ## beta = starting value(s) for coefficients of covariates
@@ -551,9 +571,7 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_)
 
 
 ## generate intervals from specified baseline pieces
-nameBases <- function(df, spline)
+nameBases <- function(df)
 {
-    if (spline == "bSplines")
-        return(paste0("B-spline", seq_len(df)))
     paste0("M-spline", seq_len(df))
 }

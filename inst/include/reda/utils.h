@@ -1,6 +1,6 @@
 //
 // R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-// Copyright (C) 2015-2021
+// Copyright (C) 2015-2022
 //
 // This file is part of the R package reda.
 //
@@ -31,7 +31,7 @@
 #include <RcppArmadillo.h>
 
 
-namespace Reda {
+namespace reda {
 
     // compare double-precision numbers for almost equality
     inline bool isAlmostEqual(double A, double B)

@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2021
+## Copyright (C) 2015-2022
 ##
 ## This file is part of the R package reda.
 ##
@@ -481,7 +481,7 @@ setMethod(f = "as.character", signature = "Recur",
                                   }
                       paste(char_id, out_char)
                   })
-              unname(as.character(char_rec))
+              unname(as.character(char_rec[unique(sorted_id)]))
           })
 
 
