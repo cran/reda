@@ -1,6 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.5.4
+Version: 0.5.5
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wang@wwenjie.org",
@@ -33,17 +33,17 @@ VignetteBuilder: knitr
 Collate: 'RcppExports.R' 'class.R' 'Recur.R' 'Survr.R' 'aic.R'
         'baseline.R' 'coef.R' 'data.R' 'mcf-generic.R' 'mcf-formula.R'
         'mcf-rateReg.R' 'mcfDiff.R' 'misc.R' 'plot.R' 'rateReg.R'
-        'reda.R' 'show.R' 'simEvent.R' 'summary.R' 'zzz.R'
+        'reda-package.R' 'show.R' 'simEvent.R' 'summary.R' 'zzz.R'
 URL: https://wwenjie.org/reda, https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.2
 NeedsCompilation: yes
-Packaged: 2022-07-08 15:47:56 UTC; wenjie
-Author: Wenjie Wang [aut, cre] (<https://orcid.org/0000-0003-0363-3180>),
+Packaged: 2025-06-14 03:03:45 UTC; wenjie
+Author: Wenjie Wang [aut, cre] (ORCID: <https://orcid.org/0000-0003-0363-3180>),
   Haoda Fu [aut],
   Sy Han (Steven) Chiou [ctb],
-  Jun Yan [ctb] (<https://orcid.org/0000-0003-4401-7296>)
+  Jun Yan [ctb] (ORCID: <https://orcid.org/0000-0003-4401-7296>)
 Maintainer: Wenjie Wang <wang@wwenjie.org>
 Repository: CRAN
-Date/Publication: 2022-07-08 21:50:02 UTC
+Date/Publication: 2025-06-14 04:50:02 UTC

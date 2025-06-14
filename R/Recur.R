@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2022
+## Copyright (C) 2015-2025
 ##
 ## This file is part of the R package reda.
 ##
@@ -69,7 +69,7 @@ NULL
 ##'     numeric vector. Non-positive values are internally converted to zero
 ##'     indicating censoring status.
 ##' @param terminal A numeric vector that may represent the status, costs, or
-##'     types of the terminal events.  Logival vector is allowed and converted
+##'     types of the terminal events.  Logical vector is allowed and converted
 ##'     to numeric vector.  Non-positive values are internally converted to zero
 ##'     indicating censoring status.  If a scalar value is specified, all
 ##'     subjects will have the same status of terminal events at their last
