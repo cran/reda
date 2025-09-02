@@ -1,6 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.5.5
+Version: 0.5.6
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wang@wwenjie.org",
@@ -22,10 +22,9 @@ Description: Contains implementations of recurrent event data analysis routines
     tests proposed by Lawless and Nadeau (1995) <doi:10.2307/1269617>,
     (4) gamma frailty model with spline rate function following
     Fu, et al. (2016) <doi:10.1080/10543406.2014.992524>.
-Imports: Rcpp, ggplot2, graphics, grDevices, methods, splines2 (>=
-        0.4.3), stats
+Imports: Rcpp, graphics, methods, splines2 (>= 0.4.3), stats
 LinkingTo: Rcpp, RcppArmadillo
-Suggests: knitr, rmarkdown, tinytest
+Suggests: ggplot2, grDevices, knitr, rmarkdown, tinytest,
 Depends: R (>= 3.2.3)
 License: GPL (>= 3)
 LazyData: true
@@ -39,11 +38,11 @@ BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
-Packaged: 2025-06-14 03:03:45 UTC; wenjie
+Packaged: 2025-09-02 13:02:51 UTC; wenjie
 Author: Wenjie Wang [aut, cre] (ORCID: <https://orcid.org/0000-0003-0363-3180>),
   Haoda Fu [aut],
   Sy Han (Steven) Chiou [ctb],
   Jun Yan [ctb] (ORCID: <https://orcid.org/0000-0003-4401-7296>)
 Maintainer: Wenjie Wang <wang@wwenjie.org>
 Repository: CRAN
-Date/Publication: 2025-06-14 04:50:02 UTC
+Date/Publication: 2025-09-02 14:00:07 UTC
